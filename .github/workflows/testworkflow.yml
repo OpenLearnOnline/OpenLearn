@@ -6,10 +6,5 @@ jobs:
   say_hello:
     runs-on: ubuntu-latest
     steps:
-    name: assign var
-    env:
-      NOOB: ${{ date }}
-    - name: check var
-      run: echo $NOOB
     - name: list env
       run: env
