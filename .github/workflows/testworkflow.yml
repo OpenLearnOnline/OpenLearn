@@ -7,6 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: set var FOO
-      run: echo ::set-env name=FOO::$(echo -n "hello world")
+      run: echo $(echo "FOO=$(echo "noodles")") >> $GITHUB_ENV
     - name: verify var
       run: echo $FOO
