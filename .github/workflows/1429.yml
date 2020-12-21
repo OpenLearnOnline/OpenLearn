@@ -4,7 +4,18 @@ on:
     types: [opened]
 
 jobs:
+  pr_commented:
+    # This job only runs for pull request comments
+    name: PR comment
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Comment on PR #${{ github.event.issue.number }}"
+
+jobs:
   new_member_registration:
+    name: new registration invitation workflow
     if: github.event.label.name == 'newuserregistration'
     runs-on: ubuntu-latest
     steps:
@@ -15,8 +26,9 @@ jobs:
       - name: install yq
         run: snap install yq -y
       - name: extract payload data from issue body
-        run: echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
-        run: cat /tmp/issuebody.yml
+        run: |
+          echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
+          cat /tmp/issuebody.yml
       - name: create environmental variable for requesting_user_id
         run: export requesting_user_id=$(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id')
       - run: echo $requesting_user_id
