@@ -15,4 +15,4 @@ jobs:
       - name: install yq
         run: sudo snap install yq
       - name: extract payload data from issue body
-      - run: cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id'
+        run: cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id'
