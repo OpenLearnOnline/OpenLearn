@@ -4,8 +4,8 @@ on:
     types: [opened]
 
 jobs:
-  if: ${{ github.event.label.name == 'newuserregistration' }}
   new_member_registration:
+    if: github.event.label.name == 'newuserregistration'
     runs-on: ubuntu-latest
     steps:
       - name: update apt
