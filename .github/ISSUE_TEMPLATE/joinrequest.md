@@ -1,7 +1,7 @@
 ---
 name: Request to join Github Org
 about: Request to join Github Org
-title: ''
+title: 'New user registration request'
 labels: 'newuserregistration'
 assignees: ''
 
