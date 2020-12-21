@@ -15,7 +15,7 @@ jobs:
 #      - name: install yq
 #        run: sudo snap install yq
       - name: test env assignment
-        run: now=$(date)
+        run: now="test"
       - name: verify env
         run: echo $now
 #      - name: extract payload data from issue body
