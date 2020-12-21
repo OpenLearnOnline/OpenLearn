@@ -15,9 +15,9 @@ jobs:
 #      - name: install yq
 #        run: sudo snap install yq
       - name: test env assignment
-        run: noodles=$(echo "funtime")
+        run: now=$(date)
       - name: verify env
-        run: echo $noodles
+        run: echo $now
 #      - name: extract payload data from issue body
 #        run: cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id'
 #      - name: cat event.json
