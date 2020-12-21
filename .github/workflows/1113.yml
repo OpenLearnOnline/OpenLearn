@@ -6,7 +6,7 @@ on:
 jobs:
   new_member_registration:
     name: new registration invitation workflow
-    if: github.event.label.name == 'newuserregistration'
+#    if: github.event.label.name == 'newuserregistration'
     runs-on: ubuntu-latest
     steps:
       - name: update apt
