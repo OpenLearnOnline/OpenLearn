@@ -4,16 +4,6 @@ on:
     types: [opened]
 
 jobs:
-  pr_commented:
-    # This job only runs for pull request comments
-    name: PR comment
-    if: ${{ github.event.issue.pull_request }}
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "Comment on PR #${{ github.event.issue.number }}"
-
-jobs:
   new_member_registration:
     name: new registration invitation workflow
     if: github.event.label.name == 'newuserregistration'
