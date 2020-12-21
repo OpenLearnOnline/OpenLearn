@@ -8,13 +8,17 @@ jobs:
     name: new registration invitation workflow
     runs-on: ubuntu-latest
     steps:
-      - name: update apt
-        run: sudo apt update
-      - name: install jq
-        run: sudo apt install jq -y
-      - name: install yq
-        run: sudo snap install yq
-      - name: extract payload data from issue body
-        run: cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id'
-      - name: cat event.json
-        run: cat /home/runner/work/_temp/_github_workflow/event.json
+#      - name: update apt
+#        run: sudo apt update
+#      - name: install jq
+#        run: sudo apt install jq -y
+#      - name: install yq
+#        run: sudo snap install yq
+      - name: test env assignment
+        run: noodles=$(echo "funtime")
+      - name: verify env
+        run: echo $noodles
+#      - name: extract payload data from issue body
+#        run: cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id'
+#      - name: cat event.json
+#        run: cat /home/runner/work/_temp/_github_workflow/event.json
