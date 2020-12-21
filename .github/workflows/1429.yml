@@ -1,0 +1,23 @@
+name: new_user_registration
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  if: github.event.label.name == 'newuserregistration'
+    new_member_registration:
+        runs-on: ubuntu-latest
+        steps:
+          - name: 
+            run: sudo apt update
+          - name: install jq
+            run: sudo apt install jq -y
+          - name: install yq
+            run: snap install yq -y
+          - name: extract payload data from issue body
+            run: echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
+            run: cat /tmp/issuebody.yml
+          - name: create environmental variable for requesting_user_id
+            run: export requesting_user_id=$(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id')
+          - run: echo $requesting_user_id
+          - run: cat /home/runner/work/_temp/_github_workflow/event.json
