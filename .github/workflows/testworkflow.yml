@@ -6,6 +6,10 @@ jobs:
   say_hello:
     runs-on: ubuntu-latest
     steps:
-    - run: |
-        echo "noob=$(date)" >> $GITHUB_ENV
-        echo $noob
+    name: assign var
+    env:
+      NOOB: $(date)
+    - name: check var
+      run: echo $NOOB
+    - name: list env
+      run: env
