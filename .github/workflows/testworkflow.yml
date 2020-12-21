@@ -9,4 +9,6 @@ jobs:
     - name: set var FOO
       run: echo $(echo "FOO=$(echo "noodles")") >> $GITHUB_ENV
     - name: verify var
-      run: echo $FOO
+      run: echo $FOO >> /tmp/foofile.txt
+    - name: verify foofile
+      run: cat /tmp/foofile.txt
