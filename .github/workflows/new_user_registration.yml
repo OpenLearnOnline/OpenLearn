@@ -1,6 +1,7 @@
 name: new_user_registration
 on:
-  workflow_dispatch:
+  issues:
+    types: [opened]
 
 jobs:
   new_member_registration:
