@@ -15,4 +15,6 @@ jobs:
       - name: install yq
         run: sudo snap install yq
       - name: extract payload data from issue body
-        run: cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id'
+        run: export requesting_user_id=$(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id')
+      - name: verify userid variable
+        run: echo $requesting_user_id
