@@ -6,8 +6,8 @@ on:
 jobs:
   new_member_registration:
       runs-on: ubuntu-latest
-      if: github.event.label.name == 'newuserregistration'
-        steps:
+      steps:
+        if: github.event.label.name == 'newuserregistration'
           - name: 
             run: sudo apt update
           - name: install jq
