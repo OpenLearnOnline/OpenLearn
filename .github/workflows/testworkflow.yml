@@ -8,7 +8,7 @@ jobs:
     steps:
     name: assign var
     env:
-      NOOB: $(date)
+      NOOB: ${{ date }}
     - name: check var
       run: echo $NOOB
     - name: list env
