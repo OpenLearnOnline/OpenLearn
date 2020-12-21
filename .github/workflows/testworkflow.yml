@@ -8,3 +8,4 @@ jobs:
     steps:
     - run: |
         echo "noob=$(date)" >> $GITHUB_ENV
+        echo $noob
