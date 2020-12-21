@@ -6,5 +6,7 @@ jobs:
   say_hello:
     runs-on: ubuntu-latest
     steps:
-    - name: list env
-      run: env
+    - name: set var FOO
+      run: echo ::set-env name=FOO::$(echo -n "hello world")
+    - name: verify var
+      run: echo $FOO
