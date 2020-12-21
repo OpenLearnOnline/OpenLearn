@@ -1,4 +1,4 @@
-name: new_user_registration
+name: new_user_registration_1113
 on:
   issues:
     types: [pinned]
