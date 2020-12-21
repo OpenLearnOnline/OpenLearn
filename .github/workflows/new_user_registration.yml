@@ -1,7 +1,6 @@
 name: new_user_registration
 on:
-  issues:
-    types: [opened]
+  workflow_dispatch:
 
 jobs:
   new_member_registration:
@@ -15,10 +14,4 @@ jobs:
       - name: install yq
         run: sudo snap install yq
       - name: extract payload data from issue body
-        run: |
-          echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
-          cat /tmp/issuebody.yml
-      - name: create environmental variable for requesting_user_id
-        run: export requesting_user_id=$(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id')
-      - run: echo $requesting_user_id
-      - run: cat /home/runner/work/_temp/_github_workflow/event.json
+      - run: cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id'
