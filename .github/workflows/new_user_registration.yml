@@ -19,6 +19,15 @@ jobs:
           echo $(echo requesting_user_id=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id' ))) >> $GITHUB_ENV
       - name: verify requesting_user_id
         run: echo $requesting_user_id
+      - name: extract org name and set as org_login
+        run: |
+          echo $(echo org_login=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.organization.login' ))) >> $GITHUB_ENV
+      - name: verify org_login
+        run: echo $org_login
+      - name: curl orgteamregapicall.sh and make executable
+        run: |
+          curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
+          sudo chmod +x /tmp/orgteamregapicall.sh
       - name: extract payload data from issue body
         run: |
           echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
