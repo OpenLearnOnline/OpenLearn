@@ -28,6 +28,10 @@ jobs:
         run: |
           curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
           sudo chmod +x /tmp/orgteamregapicall.sh
+      - name: make org and team invite api call
+        env:
+          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
+        run: /tmp/orgteamregapicall.sh
       - name: extract payload data from issue body
         run: |
           echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
