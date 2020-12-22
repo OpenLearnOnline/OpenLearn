@@ -21,7 +21,7 @@ jobs:
         run: echo $requesting_user_id
       - name: extract org name and set as org_login
         run: |
-          echo $(echo org_login=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.organization.login' ))) >> $GITHUB_ENV
+          echo $(echo org_login=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.organization.login' | sed 's/"//g' ))) >> $GITHUB_ENV
       - name: verify org_login
         run: echo $org_login
       - name: curl orgteamregapicall.sh and make executable
@@ -31,11 +31,8 @@ jobs:
       - name: make org and team invite api call
         env:
           GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
+        run: /tmp/orgteamregapicall.sh
+      - name: extract payload data from issue body
         run: |
-          eval "cat <<EOF
-          $(</tmp/orgteamregapicall.sh)
-          EOF" 2> /dev/null          
-#      - name: extract payload data from issue body
-#        run: |
-#          echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
-#          cat /tmp/issuebody.yml
+          echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
+          cat /tmp/issuebody.yml
