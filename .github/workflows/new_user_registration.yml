@@ -38,6 +38,13 @@ jobs:
         env:
           GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
         run: /tmp/orgteamregapicall.sh
+      - name: create hub config file
+        run: |
+          echo "---" > ~/.config/hub
+          echo "github.com: " >> ~/.config/hub
+          echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
+          echo "  user: modernappsninjabot" >> ~/.config/hub
+          cat ~/.config/hub
       - name: close issue ticket
         run: hub issue update $issue_number -s closed
       - name: transfer issue ticket to admin-private
