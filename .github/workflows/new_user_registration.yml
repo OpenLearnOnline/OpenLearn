@@ -8,6 +8,7 @@ jobs:
     name: new registration invitation workflow
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: update apt
         run: sudo apt update
       - name: install jq
