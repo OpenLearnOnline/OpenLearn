@@ -36,3 +36,5 @@ jobs:
         run: |
           echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
           cat /tmp/issuebody.yml
+      - name: Print event content
+        run: cat /home/runner/work/_temp/_github_workflow/event.json
