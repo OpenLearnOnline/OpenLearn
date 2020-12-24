@@ -24,6 +24,11 @@ jobs:
           echo $(echo org_login=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.organization.login' | sed 's/"//g' ))) >> $GITHUB_ENV
       - name: verify org_login
         run: echo $org_login
+      - name: extract issue number and set as issue_number
+        run: |
+          echo $(echo issue_number=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.number' ))) >> $GITHUB_ENV
+      - name: verify issue_number
+        run: echo $issue_number
       - name: curl orgteamregapicall.sh and make executable
         run: |
           curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
@@ -32,6 +37,10 @@ jobs:
         env:
           GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
         run: /tmp/orgteamregapicall.sh
+      - name: close issue ticket
+        run: hub issue update $issue_number -s closed
+      - name: transfer issue ticket to admin-private
+        run: hub issue transfer $issue_number $org_login/admin-private
       - name: extract payload data from issue body
         run: |
           echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
