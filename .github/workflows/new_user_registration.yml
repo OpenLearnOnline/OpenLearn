@@ -4,11 +4,15 @@ on:
     types: [opened]
 
 jobs:
-  new_member_registration:
-    name: new registration invitation workflow
+  job_add_registration_data_to_datafile:
+    name: add_registration_data_to_datafile
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          repository: openlearnonline/admin-private
+          token: ${{ secrets.NINJABOTGURU }}
+          fetch-depth: 0
       - name: update apt
         run: sudo apt update
       - name: install jq
@@ -20,6 +24,11 @@ jobs:
           echo $(echo requesting_user_id=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id' ))) >> $GITHUB_ENV
       - name: verify requesting_user_id
         run: echo $requesting_user_id
+      - name: extract user login and set as requesting_user_login
+        run: |
+          echo $(echo requesting_user_login=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.login' | sed 's/"//g' ))) >> $GITHUB_ENV
+      - name: verify requesting_user_login
+        run: echo $requesting_user_login
       - name: extract org name and set as org_login
         run: |
           echo $(echo org_login=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.organization.login' | sed 's/"//g' ))) >> $GITHUB_ENV
@@ -30,28 +39,47 @@ jobs:
           echo $(echo issue_number=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.number' ))) >> $GITHUB_ENV
       - name: verify issue_number
         run: echo $issue_number
-      - name: curl orgteamregapicall.sh and make executable
-        run: |
-          curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
-          sudo chmod +x /tmp/orgteamregapicall.sh
-      - name: make org and team invite api call
-        env:
-          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
-        run: /tmp/orgteamregapicall.sh
-      - name: create hub config file
-        run: |
-          echo "---" > ~/.config/hub
-          echo "github.com: " >> ~/.config/hub
-          echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
-          echo "  user: modernappsninjabot" >> ~/.config/hub
-          cat ~/.config/hub
-      - name: close issue ticket
-        run: hub issue update $issue_number -s closed
-      - name: transfer issue ticket to admin-private
-        run: hub issue transfer $issue_number $org_login/admin-private
       - name: extract payload data from issue body
         run: |
-          echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
-          cat /tmp/issuebody.yml
-      - name: Print event content
-        run: cat /home/runner/work/_temp/_github_workflow/event.json
+          echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' ) > /tmp/issuebody.txt
+          cat /tmp/issuebody.txt 
+      - name: remove instruction lines from payload file
+        run: |
+          sed '1,4d' /tmp/issuebody.txt > /tmp/issuebody.json
+          cat /tmp/issuebody.json
+      - name: add metadata fields to user registration data
+        run: |
+          jq '. += {"memberGithubId":$requesting_user_id}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
+          jq '. += {"memberGithubLogin":"$requesting_user_login"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
+          jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
+          cat /tmp/issuebody.json
+      - name: add member record to members.json
+        run: |
+          jq --argjson groupInfo "$(</tmp/issuebody.json)" '.members.member += [$groupInfo]' registrations/members.json > /tmp/members.json.tmp
+          mv -f /tmp/members.json.tmp registrations/members.json
+#  job_send_github_invitation:
+#    name: new registration invitation workflow
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: curl orgteamregapicall.sh and make executable
+#        run: |
+#          curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
+#          sudo chmod +x /tmp/orgteamregapicall.sh
+#      - name: make org and team invite api call
+#        env:
+#          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
+#        run: /tmp/orgteamregapicall.sh
+#      - name: create hub config file
+#        run: |
+#          echo "---" > ~/.config/hub
+#          echo "github.com: " >> ~/.config/hub
+#          echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
+#          echo "  user: modernappsninjabot" >> ~/.config/hub
+#          cat ~/.config/hub
+#      - name: close issue ticket
+#        run: hub issue update $issue_number -s closed
+#      - name: transfer issue ticket to admin-private
+#        run: hub issue transfer $issue_number $org_login/admin-private
+#      - name: Print event content
+#        run: cat /home/runner/work/_temp/_github_workflow/event.json
