@@ -54,7 +54,9 @@ jobs:
           cat /tmp/issuebody2.json
           sed '9d' /tmp/issuebody2.json > /tmp/issuebody3.json
           echo } >> /tmp/issuebody3.json
+          cat /tmp/issuebody3.json
           mv -f /tmp/issuebody3.json /tmp/issuebody.json
+          cat /tmp/issuebody.json
       - name: add metadata fields to user registration data
         run: |
           jq '. += {"memberGithubId":'$requesting_user_id'}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
