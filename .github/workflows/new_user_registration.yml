@@ -70,8 +70,11 @@ jobs:
           cat /tmp/issuebody.json
       - name: extract issuebody to $issue_body
         run: |
+          cat /tmp/issuebody.json
           echo $(echo issue_body=$(echo $(cat /tmp/issuebody.json))) >> $GITHUB_ENV
           echo $issue_body
+      - name: verify $issue_body
+        run: echo $issue_body
       - name: add member record to members.json
         run: |
           jq '.members.member += ['$issue_body']' registrations/members.json > /tmp/members.json.tmp
