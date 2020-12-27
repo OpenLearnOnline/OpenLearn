@@ -14,12 +14,12 @@ jobs:
           repository: openlearnonline/admin-private
           token: ${{ secrets.NINJABOTGURU }}
           fetch-depth: 0
-      - name: update apt
-        run: sudo apt update
-      - name: install jq
-        run: sudo apt install jq -y
-      - name: install yq
-        run: sudo snap install yq
+#      - name: update apt
+#        run: sudo apt update
+#      - name: install jq
+#        run: sudo apt install jq -y
+#      - name: install yq
+#        run: sudo snap install yq
       - name: extract user id and set as requesting_user_id
         run: |
           echo $(echo requesting_user_id=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id' ))) >> $GITHUB_ENV
