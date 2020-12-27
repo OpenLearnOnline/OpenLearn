@@ -44,12 +44,18 @@ jobs:
         run: |
           echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' ) > /tmp/issuebody.txt
           cat /tmp/issuebody.txt 
-      - name: remove instruction lines from payload file
+      - name: remove instruction lines from issuebody file
         run: |
           sed '1,4d' /tmp/issuebody.txt > /tmp/issuebody.json
           cat /tmp/issuebody.json
+      - name: remove unnecessary forward slashes from issuebody file
+        run: |
+          sed 's/\\//g' /tmp/issuebody.txt > /tmp/issuebody.json
+          cat /tmp/issuebody.json
       - name: add metadata fields to user registration data
         run: |
+          echo $requesting_user_id
+          echo $requesting_user_login
           jq '. += {"memberGithubId":$requesting_user_id}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           jq '. += {"memberGithubLogin":"$requesting_user_login"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
