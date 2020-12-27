@@ -50,7 +50,7 @@ jobs:
           cat /tmp/issuebody.json
       - name: remove unnecessary forward slashes from issuebody file
         run: |
-          sed 's/\\//g' /tmp/issuebody.txt > /tmp/issuebody.json
+          sed 's/\\//g' /tmp/issuebody.json > /tmp/issuebody.json
           cat /tmp/issuebody.json
       - name: add metadata fields to user registration data
         run: |
