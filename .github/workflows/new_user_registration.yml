@@ -48,15 +48,20 @@ jobs:
         run: |
           sed '1,4d' /tmp/issuebody.txt > /tmp/issuebody.json
           cat /tmp/issuebody.json
-      - name: remove unnecessary forward slashes from issuebody file
+      - name: remove unnecessary forward slashes and trailing quote from issuebody file
         run: |
-          sed 's/\\//g' /tmp/issuebody.json > /tmp/issuebody.json
-          cat /tmp/issuebody.json
+          sed 's/\\//g' /tmp/issuebody.json > /tmp/issuebody2.json
+          cat /tmp/issuebody2.json
+          sed '9d' /tmp/issuebody2.json > /tmp/issuebody3.json
+          echo } >> /tmp/issuebody3.json
+          mv -f /tmp/issuebody3.json /tmp/issuebody.json
       - name: add metadata fields to user registration data
         run: |
-          echo $requesting_user_id
-          echo $requesting_user_login
-          jq '. += {"memberGithubId":'$requesting_user_id'}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
+#          echo $requesting_user_id
+#          echo $requesting_user_login
+          jq '. += {"memberGithubId":'$requesting_user_id'}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
+          mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
+          cat 
           jq '. += {"memberGithubLogin":"'$requesting_user_login'"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
