@@ -62,10 +62,10 @@ jobs:
           jq '. += {"memberGithubId":'$requesting_user_id'}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
-          jq '. += {"memberGithubLogin":"'$requesting_user_login'"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
+          jq '. += {"memberGithubLogin":"'$requesting_user_login'"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
-          jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
+          jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
       - name: extract issuebody to $issue_body
