@@ -56,8 +56,8 @@ jobs:
         run: |
           echo $requesting_user_id
           echo $requesting_user_login
-          jq '. += {"memberGithubId":$requesting_user_id}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
-          jq '. += {"memberGithubLogin":"$requesting_user_login"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
+          jq '. += {"memberGithubId":'$requesting_user_id'}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
+          jq '. += {"memberGithubLogin":"'$requesting_user_login'"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp && mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
       - name: add member record to members.json
