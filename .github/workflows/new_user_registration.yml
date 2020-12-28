@@ -8,18 +8,18 @@ jobs:
     name: add_registration_data_to_datafile
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: main
-          repository: openlearnonline/admin-private
-          token: ${{ secrets.NINJABOTGURU }}
-          fetch-depth: 0
-#      - name: update apt
-#        run: sudo apt update
-#      - name: install jq
-#        run: sudo apt install jq -y
-#      - name: install yq
-#        run: sudo snap install yq
+      - name: create hub config file
+        run: |
+          echo "---" > ~/.config/hub
+          echo "github.com: " >> ~/.config/hub
+          echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
+          echo "  user: modernappsninjabot" >> ~/.config/hub
+          cat ~/.config/hub
+      - name: hub clone admin-private repo
+        run: |
+          hub clone openlearnonline/admin-private
+          cd admin-private
+          pwd
       - name: extract user id and set as requesting_user_id
         run: |
           echo $(echo requesting_user_id=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id' ))) >> $GITHUB_ENV
@@ -77,7 +77,7 @@ jobs:
         run: |
           git add .
           git commit -m "adding new member $requesting_user_login to members.json"
-          git push
+          hub push
 #      - name: extract issuebody to $issue_body
 #        run: |
 #          cat /tmp/issuebody.json
