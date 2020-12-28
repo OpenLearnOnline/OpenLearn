@@ -14,8 +14,10 @@ jobs:
           echo "github.com: " >> ~/.config/hub
           echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
           echo "  user: modernappsninjabot" >> ~/.config/hub
-          cat ~/.config/hub
+          hub config --global user.email modernappsninjabot@gmail.com
+          hub config --global user.name modernappsninjabot
           git config --global hub.protocol https
+          cat ~/.config/hub
       - name: hub clone admin-private repo
         run: |
           hub clone openlearnonline/admin-private
