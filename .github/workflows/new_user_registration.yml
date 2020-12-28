@@ -17,13 +17,15 @@ jobs:
           hub config --global user.email modernappsninjabot@gmail.com
           hub config --global user.name modernappsninjabot
           git config --global hub.protocol https
+          git config --global user.name modernappsninjabot
+          git config --global user.email modernappsninjabot@gmail.com
           cat ~/.config/hub
       - name: hub clone admin-private repo
         run: |
           hub clone openlearnonline/admin-private
           cd admin-private
           pwd
-          hub remote set-url origin https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/admin-private.git
+#          hub remote set-url origin https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/admin-private.git
       - name: extract user id and set as requesting_user_id
         run: |
           echo $(echo requesting_user_id=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id' ))) >> $GITHUB_ENV
