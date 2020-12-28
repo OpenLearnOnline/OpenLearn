@@ -68,18 +68,24 @@ jobs:
           jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
-      - name: extract issuebody to $issue_body
-        run: |
-          cat /tmp/issuebody.json
-          echo $(echo issue_body=$(echo $(cat /tmp/issuebody.json))) >> $GITHUB_ENV
-          echo $issue_body
-      - name: verify $issue_body
-        run: echo $issue_body
       - name: add member record to members.json
         run: |
-          jq '.members.member += ['$issue_body']' registrations/members.json > /tmp/members.json.tmp
+          jq --argjson groupInfo "$(</tmp/issuebody.json)" '.members.member += [$groupInfo]' registrations/members.json > /tmp/members.json.tmp
           mv -f /tmp/members.json.tmp registrations/members.json
           cat registrations/members.json
+#      - name: extract issuebody to $issue_body
+#        run: |
+#          cat /tmp/issuebody.json
+#          echo $(echo issue_body=$(echo $(cat /tmp/issuebody.json))) >> $GITHUB_ENV
+#          echo $issue_body
+#      - name: verify $issue_body
+#        run: echo $issue_body          
+#      - name: add member record to members.json
+#        run: |
+#          jq '.members.member += ['$issue_body']' registrations/members.json > /tmp/members.json.tmp
+#          mv -f /tmp/members.json.tmp registrations/members.json
+#         cat registrations/members.json
+#####
 #  job_send_github_invitation:
 #    name: new registration invitation workflow
 #    runs-on: ubuntu-latest
