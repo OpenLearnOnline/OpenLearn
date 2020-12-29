@@ -82,7 +82,7 @@ jobs:
         run: echo $dupmember
       - name: add member record to members.json
         run: |
-          if [$dupmember == 'false']
+          if [$dupmember = 'false']
           then
             cd /home/runner/work/OpenLearn/OpenLearn/admin-private
             jq --argjson groupInfo "$(</tmp/issuebody.json)" '.members.member += [$groupInfo]' registrations/members.json > /tmp/members.json.tmp
