@@ -8,21 +8,16 @@ jobs:
     name: add_registration_data_to_datafile
     runs-on: ubuntu-latest
     steps:
-      - name: create hub config file
+      - name: initialize git
         run: |
-          echo "---" > ~/.config/hub
-          echo "github.com: " >> ~/.config/hub
-          echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
-          echo "  user: modernappsninjabot" >> ~/.config/hub
-          hub config --global user.email modernappsninjabot@gmail.com
-          hub config --global user.name modernappsninjabot
-          git config --global hub.protocol https
+          mkdir admin-private
+          cd admin-private
           git config --global user.name modernappsninjabot
           git config --global user.email modernappsninjabot@gmail.com
-          cat ~/.config/hub
-      - name: hub clone admin-private repo
+          git init 
+      - name: clone admin-private repo
         run: |
-          hub clone openlearnonline/admin-private
+          git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/admin-private.git
           cd admin-private
           pwd
 #          hub remote set-url origin https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/admin-private.git
@@ -83,7 +78,7 @@ jobs:
         run: |
           git add .
           git commit -m "adding new member $requesting_user_login to members.json"
-          hub push
+          git push
 #      - name: extract issuebody to $issue_body
 #        run: |
 #          cat /tmp/issuebody.json
