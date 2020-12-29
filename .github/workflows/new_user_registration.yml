@@ -69,7 +69,8 @@ jobs:
           cat /tmp/issuebody.json
       - name: check if member record exists
         run: |
-          jq '.members.member[] | select(.memberGithubId=='$requesting_user_id')' members.json /tmp/dupmember.out
+          cd /home/runner/work/OpenLearn/OpenLearn/admin-private
+          jq '.members.member[] | select(.memberGithubId=='$requesting_user_id')' registrations/members.json > /tmp/dupmember.out
           cat /tmp/dupmember.out
       - name: add member record to members.json
         run: |
