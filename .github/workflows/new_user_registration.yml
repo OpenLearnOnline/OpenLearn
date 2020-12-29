@@ -75,8 +75,7 @@ jobs:
           cat registrations/members.json
       - name: push updates to git repo
         run: |
-          echo $HOME
-          cd ~/admin-private
+          cd /home/runner/work/OpenLearn/OpenLearn/admin-private
           git add .
           git commit -m "adding new member $requesting_user_login to members.json"
           git push
