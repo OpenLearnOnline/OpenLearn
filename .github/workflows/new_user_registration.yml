@@ -10,8 +10,6 @@ jobs:
     steps:
       - name: initialize git
         run: |
-          mkdir admin-private
-          cd admin-private
           git config --global user.name modernappsninjabot
           git config --global user.email modernappsninjabot@gmail.com
           git init 
