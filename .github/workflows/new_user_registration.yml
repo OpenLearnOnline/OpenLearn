@@ -104,36 +104,37 @@ jobs:
           git add .
           git commit -m "adding new member $requesting_user_login to members.json"
           git push
-      - name: test pwd
-        run: pwd
-#####
-#  job_send_github_invitation:
-#    name: new registration invitation workflow
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: get env
-#        run: env
-#      - name: cat github env
-#        run: cat $GITHUB_ENV
-#      - name: curl orgteamregapicall.sh and make executable
-#        run: |
-#          curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
-#          sudo chmod +x /tmp/orgteamregapicall.sh
-#      - name: make org and team invite api call
-#        env:
-#          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
-#        run: /tmp/orgteamregapicall.sh
-#      - name: create hub config file
-#        run: |
-#          echo "---" > ~/.config/hub
-#          echo "github.com: " >> ~/.config/hub
-#          echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
-#          echo "  user: modernappsninjabot" >> ~/.config/hub
-#          cat ~/.config/hub
-#      - name: close issue ticket
-#        run: hub issue update $issue_number -s closed
-#      - name: transfer issue ticket to admin-private
-#        run: hub issue transfer $issue_number $org_login/admin-private
+      - name: clone openlearn repo
+        run: |
+          git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/openlearn.git
+          cd OpenLearn
+          pwd
+        run: cat $GITHUB_ENV
+      - name: curl orgteamregapicall.sh and make executable
+        run: |
+          cd OpenLearn
+          curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
+          sudo chmod +x /tmp/orgteamregapicall.sh
+      - name: make org and team invite api call
+        env:
+          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
+        run: |
+          cd OpenLearn
+          /tmp/orgteamregapicall.sh
+      - name: create hub config file
+        run: |
+          echo "---" > ~/.config/hub
+          echo "github.com: " >> ~/.config/hub
+          echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
+          echo "  user: modernappsninjabot" >> ~/.config/hub
+          cat ~/.config/hub
+      - name: close issue ticket
+        run: |
+          cd OpenLearn
+          hub issue update $issue_number -s closed
+      - name: transfer issue ticket to admin-private
+        run: |
+          cd OpenLearn
+          hub issue transfer $issue_number $org_login/admin-private
 #      - name: Print event content
 #        run: cat /home/runner/work/_temp/_github_workflow/event.json
