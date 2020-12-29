@@ -67,6 +67,10 @@ jobs:
           jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
+      - name: check if member record exists
+        run: |
+          jq '.members.member[] | select(.memberGithubId=='$requesting_user_id')' members.json /tmp/dupmember.out
+          cat /tmp/dupmember.out
       - name: add member record to members.json
         run: |
           cd /home/runner/work/OpenLearn/OpenLearn/admin-private
