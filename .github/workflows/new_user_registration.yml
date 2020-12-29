@@ -82,11 +82,22 @@ jobs:
         run: echo $dupmember
       - name: add member record to members.json
         run: |
-          cd /home/runner/work/OpenLearn/OpenLearn/admin-private
-          jq --argjson groupInfo "$(</tmp/issuebody.json)" '.members.member += [$groupInfo]' registrations/members.json > /tmp/members.json.tmp
-          mv -f /tmp/members.json.tmp registrations/members.json
-          cat registrations/members.json
+          if [$dupmember]
+          then
+            cd /home/runner/work/OpenLearn/OpenLearn/admin-private
+            jq --argjson groupInfo "$(</tmp/issuebody.json)" '.members.member += [$groupInfo]' registrations/members.json > /tmp/members.json.tmp
+            mv -f /tmp/members.json.tmp registrations/members.json
+            cat registrations/members.json
+          else
+            echo "duplicate member, skipping registration"
+      - name: if dupmember true
+        if: env.dupmember == 'true'
+        run: echo "dupmember is true"
+      - name: if dupmember false
+        if: env.dupmember == 'false'
+        run: echo "dupmember is false"
       - name: push updates to git repo
+        if: env.dupmember == 'false'
         run: |
           cd /home/runner/work/OpenLearn/OpenLearn/admin-private
           git add .
