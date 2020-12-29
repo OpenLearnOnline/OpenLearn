@@ -89,7 +89,7 @@ jobs:
             mv -f /tmp/members.json.tmp registrations/members.json
             cat registrations/members.json
           else
-            echo "duplicate member, skipping registration"
+            echo "duplicate request, skipping registration"
           fi
       - name: if dupmember true
         if: env.dupmember == 'true'
@@ -104,6 +104,8 @@ jobs:
           git add .
           git commit -m "adding new member $requesting_user_login to members.json"
           git push
+      - name: test unconditional command
+        run: echo "the unconditional command ran"
 #      - name: extract issuebody to $issue_body
 #        run: |
 #          cat /tmp/issuebody.json
