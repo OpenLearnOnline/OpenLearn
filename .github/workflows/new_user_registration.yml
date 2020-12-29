@@ -90,6 +90,7 @@ jobs:
             cat registrations/members.json
           else
             echo "duplicate member, skipping registration"
+          fi
       - name: if dupmember true
         if: env.dupmember == 'true'
         run: echo "dupmember is true"
