@@ -72,6 +72,14 @@ jobs:
           cd /home/runner/work/OpenLearn/OpenLearn/admin-private
           jq '.members.member[] | select(.memberGithubId=='$requesting_user_id')' registrations/members.json > /tmp/dupmember.out
           cat /tmp/dupmember.out
+          if [ -s /tmp/dupmember.out ]
+          then
+            echo dupmember=true >> $GITHUB_ENV
+          else
+            echo dupmember=false >> $GITHUB_ENV
+          fi
+      - name: verify dupnumber var
+        run: echo $dupmember
       - name: add member record to members.json
         run: |
           cd /home/runner/work/OpenLearn/OpenLearn/admin-private
