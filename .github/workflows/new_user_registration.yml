@@ -69,7 +69,7 @@ jobs:
           cat /tmp/issuebody.json
       - name: add member record to members.json
         run: |
-          cd admin-private
+          cd /home/runner/work/OpenLearn/OpenLearn/admin-private
           jq --argjson groupInfo "$(</tmp/issuebody.json)" '.members.member += [$groupInfo]' registrations/members.json > /tmp/members.json.tmp
           mv -f /tmp/members.json.tmp registrations/members.json
           cat registrations/members.json
