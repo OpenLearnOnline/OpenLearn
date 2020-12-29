@@ -119,11 +119,15 @@ jobs:
 #          mv -f /tmp/members.json.tmp registrations/members.json
 #         cat registrations/members.json
 #####
-#  job_send_github_invitation:
-#    name: new registration invitation workflow
-#    runs-on: ubuntu-latest
-#    steps:
+  job_send_github_invitation:
+    name: new registration invitation workflow
+    runs-on: ubuntu-latest
+    steps:
 #      - uses: actions/checkout@v2
+      - name: get env
+        run: env
+      - name: cat github env
+        run: cat $GITHUB_ENV
 #      - name: curl orgteamregapicall.sh and make executable
 #        run: |
 #          curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
