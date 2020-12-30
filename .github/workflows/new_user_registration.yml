@@ -111,7 +111,7 @@ jobs:
       - name: clone openlearn repo
         run: |
           git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/openlearn.git
-          cd OpenLearn
+          cd openlearn
           pwd
       - name: curl orgteamregapicall.sh and make executable
         if: env.dupmember == 'false'
@@ -166,18 +166,18 @@ jobs:
       - name: if dupmember true, append message to issue ticket and close ticket
         if: env.dupmember == 'true'
         run: |
-          cd OpenLearn
+          cd openlearn
           hub issue update $issue_number --message "registration request for user $requesting_user_login is dupicate, closing" --message "The github user $requesting_user_login is already registered. This request has been marked as a dupicate request and will be closed."
           hub issue update $issue_number -s closed
       - name: if dupmember false, append message to issue ticket and close ticket
         if: env.dupmember == 'false'
         run: |
-          cd OpenLearn
+          cd openlearn
           hub issue update $issue_number --message "registration request for user $requesting_user_login has been processed" --message "The github user $requesting_user_login has been sent an invite to join the modernapps ninja org, and this issue ticket will now be closed."
           hub issue update $issue_number -s closed
       - name: transfer issue ticket to admin-private
         run: |
-          cd OpenLearn
+          cd openlearn
           hub issue transfer $issue_number $org_login/admin-private
 #      - name: Print event content
 #        run: cat /home/runner/work/_temp/_github_workflow/event.json
