@@ -18,7 +18,6 @@ jobs:
           git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/admin-private.git
           cd admin-private
           pwd
-#          hub remote set-url origin https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/admin-private.git
       - name: extract user id and set as requesting_user_id
         run: |
           echo $(echo requesting_user_id=$(echo $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id' ))) >> $GITHUB_ENV
@@ -67,6 +66,11 @@ jobs:
           jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
+      - name: extract user preferred email and set as requesting_user_email
+        run: |
+          echo $(echo requesting_user_email=$(echo $(cat /tmp/issuebody.json | jq '.preferredEmailAddress' | sed 's/"//g' ))) >> $GITHUB_ENV
+      - name: verify requesting_user_email
+        run: echo $requesting_user_email
       - name: check if member record exists
         run: |
           cd /home/runner/work/OpenLearn/OpenLearn/admin-private
@@ -89,7 +93,7 @@ jobs:
             mv -f /tmp/members.json.tmp registrations/members.json
             cat registrations/members.json
           else
-            echo "duplicate request, skipping registration"
+            echo "duplicate entry, skipping registration"
           fi
       - name: check if dupmember true
         if: env.dupmember == 'true'
@@ -105,21 +109,21 @@ jobs:
           git commit -m "adding new member $requesting_user_login to members.json"
           git push
       - name: clone openlearn repo
+        if: env.dupmember == 'false'
         run: |
           git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/openlearn.git
           cd OpenLearn
           pwd
-        run: cat $GITHUB_ENV
       - name: curl orgteamregapicall.sh and make executable
+        if: env.dupmember == 'false'
         run: |
-          cd OpenLearn
           curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
           sudo chmod +x /tmp/orgteamregapicall.sh
       - name: make org and team invite api call
+        if: env.dupmember == 'false'
         env:
           GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
         run: |
-          cd OpenLearn
           /tmp/orgteamregapicall.sh
       - name: create hub config file
         run: |
@@ -128,9 +132,47 @@ jobs:
           echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
           echo "  user: modernappsninjabot" >> ~/.config/hub
           cat ~/.config/hub
-      - name: close issue ticket
+      - name: if dupmember true, send email duplicate registration notice
+        if: env.dupmember == 'true'
+        uses: dawidd6/action-send-mail@v2
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.NINJABOT_MAIL_USERNAME}}
+          password: ${{secrets.NINJABOT_MAIL_PASSWORD}}
+          subject: Your ModernApps Ninja User Registration is a Duplicate
+          body: |
+            Your registration request with ModernApps Ninja for github user $requesting_user_login was recieved, but was found to be a duplicate request.
+            When you open a registration request, the github account you are logged in as at the time is used for the registration request.
+            If you intended to request registration for a different account, please log in with the desired account first, and then open a new registration request ticket.
+            If you believe this message to be in error, or are having issues with your account registration, please open a support request ticket at https://github.com/modernappsninja.modernappsninja.github.io
+          to: $requesting_user_email
+      - name: if dupmember false, send email registration complete notice
+        if: env.dupmember == 'false'
+        uses: dawidd6/action-send-mail@v2
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{secrets.NINJABOT_MAIL_USERNAME}}
+          password: ${{secrets.NINJABOT_MAIL_PASSWORD}}
+          subject: An invite has been sent to $requesting_user_login to join the ModernApps Ninja Github org.
+          body: |
+            Your registration request with ModernApps Ninja for github user $requesting_user_login was recieved and an invitation to join the org has been sent to the email associated with the $requesting_user_login Github account.
+            Before registration can be finalized for the requesting github account, you will need to view the invitation email sent by github to the email address associated with the $requesting_user_login Github account.
+            After you accept the invitation for the account to join the ModernApps Ninja Github account, a workflow will be triggered that will complete your user registration and setup your member profile page, and an email will be sent to this address when the process is complete. 
+            Thank you for your participation and welcome to the ModernApps Ninja Community!
+          to: $requesting_user_email
+      - name: if dupmember true, append message to issue ticket and close ticket
         run: |
+          if: env.dupmember == 'true'
           cd OpenLearn
+          hub issue update $issue_number --message "registration request for user $requesting_user_login is dupicate, closing" --message "The github user $requesting_user_login is already registered. This request has been marked as a dupicate request and will be closed."
+          hub issue update $issue_number -s closed
+      - name: if dupmember false, append message to issue ticket and close ticket
+        run: |
+          if: env.dupmember == 'false'
+          cd OpenLearn
+          hub issue update $issue_number --message "registration request for user $requesting_user_login has been processed" --message "The github user $requesting_user_login has been sent an invite to join the modernapps ninja org, and this issue ticket will now be closed."
           hub issue update $issue_number -s closed
       - name: transfer issue ticket to admin-private
         run: |
