@@ -6,6 +6,7 @@ on:
 jobs:
   job_add_registration_data_to_datafile:
     name: add_registration_data_to_datafile
+    if: github.event.label.name == 'newuserregistration'
     runs-on: ubuntu-latest
     steps:
       - name: initialize git
@@ -157,7 +158,7 @@ jobs:
           password: ${{secrets.NINJABOT_MAIL_PASSWORD}}
           to: ${{ env.requesting_user_email }}
           from: modernappsninjabot@gmail.com
-          subject: An invite has been sent to $requesting_user_login to join the ModernApps Ninja Github org.
+          subject: An invite has been sent to ${{ env.requesting_user_login }} to join the ModernApps Ninja Github org.
           body: |
             Your registration request with ModernApps Ninja for github user ${{ env.requesting_user_login }} was recieved and an invitation to join the org has been sent to the email associated with the ${{ env.requesting_user_login }} Github account.
             Before registration can be finalized for the requesting github account, you will need to view the invitation email sent by github to the email address associated with the ${{ env.requesting_user_login }} Github account.
@@ -167,13 +168,13 @@ jobs:
         if: env.dupmember == 'true'
         run: |
           cd openlearn
-          hub issue update $issue_number --message "registration request for user $requesting_user_login is dupicate, closing" --message "The github user $requesting_user_login is already registered. This request has been marked as a dupicate request and will be closed."
+          hub issue update $issue_number --message "registration request for user $requesting_user_login is dupicate, closing" --message "The github user ${{ env.requesting_user_login }} is already registered. This request has been marked as a dupicate request and will be closed."
           hub issue update $issue_number -s closed
       - name: if dupmember false, append message to issue ticket and close ticket
         if: env.dupmember == 'false'
         run: |
           cd openlearn
-          hub issue update $issue_number --message "registration request for user $requesting_user_login has been processed" --message "The github user $requesting_user_login has been sent an invite to join the modernapps ninja org, and this issue ticket will now be closed."
+          hub issue update $issue_number --message "registration request for user $requesting_user_login has been processed" --message "The github user ${{ env.requesting_user_login }} has been sent an invite to join the modernapps ninja org, and this issue ticket will now be closed."
           hub issue update $issue_number -s closed
       - name: transfer issue ticket to admin-private
         run: |
