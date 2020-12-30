@@ -109,7 +109,6 @@ jobs:
           git commit -m "adding new member $requesting_user_login to members.json"
           git push
       - name: clone openlearn repo
-        if: env.dupmember == 'false'
         run: |
           git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/openlearn.git
           cd OpenLearn
