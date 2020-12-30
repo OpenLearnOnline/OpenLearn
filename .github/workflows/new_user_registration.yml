@@ -138,7 +138,7 @@ jobs:
         with:
           server_address: smtp.gmail.com
           server_port: 465
-          username: ${{secrets.NINJABOT_MAIL_USERNAME}}
+          username: modernappsninjabot@gmail.com
           password: ${{secrets.NINJABOT_MAIL_PASSWORD}}
           subject: Your ModernApps Ninja User Registration is a Duplicate
           body: |
@@ -154,7 +154,7 @@ jobs:
         with:
           server_address: smtp.gmail.com
           server_port: 465
-          username: ${{secrets.NINJABOT_MAIL_USERNAME}}
+          username: modernappsninjabot@gmail.com
           password: ${{secrets.NINJABOT_MAIL_PASSWORD}}
           subject: An invite has been sent to $requesting_user_login to join the ModernApps Ninja Github org.
           body: |
