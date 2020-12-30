@@ -147,6 +147,7 @@ jobs:
             If you intended to request registration for a different account, please log in with the desired account first, and then open a new registration request ticket.
             If you believe this message to be in error, or are having issues with your account registration, please open a support request ticket at https://github.com/modernappsninja.modernappsninja.github.io
           to: $requesting_user_email
+          from: modernappsninjabot@gmail.com
       - name: if dupmember false, send email registration complete notice
         if: env.dupmember == 'false'
         uses: dawidd6/action-send-mail@v2
@@ -162,6 +163,7 @@ jobs:
             After you accept the invitation for the account to join the ModernApps Ninja Github account, a workflow will be triggered that will complete your user registration and setup your member profile page, and an email will be sent to this address when the process is complete. 
             Thank you for your participation and welcome to the ModernApps Ninja Community!
           to: $requesting_user_email
+          from: modernappsninjabot@gmail.com
       - name: if dupmember true, append message to issue ticket and close ticket
         run: |
           if: env.dupmember == 'true'
