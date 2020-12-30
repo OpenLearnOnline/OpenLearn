@@ -165,14 +165,14 @@ jobs:
             After you accept the invitation for the account to join the ModernApps Ninja Github account, a workflow will be triggered that will complete your user registration and setup your member profile page, and an email will be sent to this address when the process is complete. 
             Thank you for your participation and welcome to the ModernApps Ninja Community!
       - name: if dupmember true, append message to issue ticket and close ticket
+        if: env.dupmember == 'true'
         run: |
-          if: env.dupmember == 'true'
           cd OpenLearn
           hub issue update $issue_number --message "registration request for user $requesting_user_login is dupicate, closing" --message "The github user $requesting_user_login is already registered. This request has been marked as a dupicate request and will be closed."
           hub issue update $issue_number -s closed
       - name: if dupmember false, append message to issue ticket and close ticket
+        if: env.dupmember == 'false'
         run: |
-          if: env.dupmember == 'false'
           cd OpenLearn
           hub issue update $issue_number --message "registration request for user $requesting_user_login has been processed" --message "The github user $requesting_user_login has been sent an invite to join the modernapps ninja org, and this issue ticket will now be closed."
           hub issue update $issue_number -s closed
