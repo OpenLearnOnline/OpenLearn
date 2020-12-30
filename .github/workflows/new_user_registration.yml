@@ -6,7 +6,7 @@ on:
 jobs:
   job_add_registration_data_to_datafile:
     name: add_registration_data_to_datafile
-    if: github.event.issue.labels.name == 'newuserregistration'
+    if: contains( toJson(github), 'newuserregistration' )
     runs-on: ubuntu-latest
     steps:
       - name: initialize git
