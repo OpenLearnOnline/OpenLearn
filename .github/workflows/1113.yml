@@ -1,24 +1,16 @@
-name: new_user_registration_1113
+name: new member added workfow
 on:
-  issues:
-    types: [pinned]
+  member:
+    types: [added]
 
 jobs:
-  new_member_registration:
-    name: new registration invitation workflow
+  new_member_added:
+    name: new member added job
     runs-on: ubuntu-latest
     steps:
-      - name: update apt
-        run: sudo apt update
-      - name: install jq
-        run: sudo apt install jq -y
-      - name: install yq
-        run: snap install yq -y
-      - name: extract payload data from issue body
-        run: |
-          echo -e $(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.body' | sed 's/"//g' ) > /tmp/issuebody.yml
-          cat /tmp/issuebody.yml
-      - name: create environmental variable for requesting_user_id
-        run: export requesting_user_id=$(cat /home/runner/work/_temp/_github_workflow/event.json | jq '.issue.user.id')
-      - run: echo $requesting_user_id
-      - run: cat /home/runner/work/_temp/_github_workflow/event.json
+      - name: run pwd
+        run: pwd
+      - name: run ls
+        run: ls
+      - name: run env
+        run: env
