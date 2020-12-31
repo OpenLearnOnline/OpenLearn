@@ -1,7 +1,6 @@
 name: new member added workfow
 on:
   member:
-    types: [added]
 
 jobs:
   new_member_added:
