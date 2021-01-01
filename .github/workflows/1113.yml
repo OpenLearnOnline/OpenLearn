@@ -1,15 +1,20 @@
 name: new member added workfow
 on:
   repository_dispatch:
+    types: [org_member_change]
 
 jobs:
   new_member_added:
     name: new member added job
     runs-on: ubuntu-latest
     steps:
-      - name: run pwd
-        run: pwd
-      - name: run ls
-        run: ls
-      - name: run env
-        run: env
+      - name: echo payload
+        run: echo ${{ github.event.client_payload }}
+      - name: echo payload action
+        run: echo ${{ github.event.client_payload.action }}
+      - name: echo if added
+        if: github.event.client_payload.action == 'added'
+        run: echo "the webhook action was added"
+      - name: echo if removed
+        if: github.event.client_payload.action == 'removed'
+        run: echo "the webhook action was removed"
