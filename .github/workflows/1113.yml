@@ -8,13 +8,13 @@ jobs:
     name: new member added job
     runs-on: ubuntu-latest
     steps:
-      - name: echo payload
-        run: echo ${{ github.event.client_payload }}
-      - name: echo payload action
-        run: echo ${{ github.event.client_payload.action }}
+      - name: cat payload file
+        run: cat /home/runner/work/_temp/_github_workflow/event.json
+      - name: echo payload variable
+        run: echo ${{ payload }}
       - name: echo if added
-        if: github.event.client_payload.action == 'added'
+        if: payload.action == 'added'
         run: echo "the webhook action was added"
       - name: echo if removed
-        if: github.event.client_payload.action == 'removed'
+        if: payload.action == 'removed'
         run: echo "the webhook action was removed"
