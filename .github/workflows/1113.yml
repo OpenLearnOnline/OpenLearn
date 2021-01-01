@@ -10,11 +10,11 @@ jobs:
     steps:
       - name: cat payload file
         run: cat /home/runner/work/_temp/_github_workflow/event.json
-      - name: echo payload variable
-        run: echo ${{ payload }}
-      - name: echo if added
-        if: payload.action == 'added'
-        run: echo "the webhook action was added"
-      - name: echo if removed
-        if: payload.action == 'removed'
-        run: echo "the webhook action was removed"
+#      - name: echo payload variable
+#        run: echo ${{ payload }}
+#      - name: echo if added
+#        if: payload.action == 'added'
+#        run: echo "the webhook action was added"
+#      - name: echo if removed
+#        if: payload.action == 'removed'
+#        run: echo "the webhook action was removed"
