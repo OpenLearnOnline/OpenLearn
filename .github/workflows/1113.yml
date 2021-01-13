@@ -20,7 +20,7 @@ jobs:
         if: github.event.client_payload.action == 'removed'
         run: echo "the webhook action was removed"
   member_removed:
-    name: new member added job
+    name: member removed job
     runs-on: ubuntu-latest
     if: github.event.client_payload.action == 'removed'
     steps:
