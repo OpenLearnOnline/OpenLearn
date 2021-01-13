@@ -19,3 +19,18 @@ jobs:
       - name: echo if removed
         if: github.event.client_payload.action == 'removed'
         run: echo "the webhook action was removed"
+  member_removed:
+    name: new member added job
+    runs-on: ubuntu-latest
+    if: github.event.client_payload.action == 'removed'
+    steps:
+      - name: cat payload file
+        run: cat /home/runner/work/_temp/_github_workflow/event.json
+      - name: echo client_payload.action variable
+        run: echo ${{ github.event.client_payload.action }}
+      - name: echo if added
+        if: github.event.client_payload.action == 'added'
+        run: echo "the webhook action was added"
+      - name: echo if removed
+        if: github.event.client_payload.action == 'removed'
+        run: echo "the webhook action was removed"
