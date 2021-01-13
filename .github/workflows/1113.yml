@@ -7,6 +7,7 @@ jobs:
   new_member_added:
     name: new member added job
     runs-on: ubuntu-latest
+    if: github.event.client_payload.action == 'added'
     steps:
       - name: cat payload file
         run: cat /home/runner/work/_temp/_github_workflow/event.json

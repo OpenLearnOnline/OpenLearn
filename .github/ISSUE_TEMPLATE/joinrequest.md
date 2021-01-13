@@ -11,11 +11,11 @@ assignees: ''
 #### By submitting this ticket, you acknowledge you have read and understood the registration instructions, and acknowlege and agree to the handling of the registration data you provide below as described in the registration instructions at the link above
 
 {
-  "preferredEmailAddress":"testuser2@test.com",
-  "firstName":"John2",
-  "lastName":"Doe2",
-  "displayFullNameOnGithubProfile":true,
-  "displayPreferredEmailOnGithubProfile":false,
+  "preferredEmailAddress":"",
+  "firstName":"",
+  "lastName":"",
+  "twitterUsername":"",
+  "linkedinUsername":"",
   "isVmwareEmployee":false,
   "vmwareEmailAddress":""
 }
