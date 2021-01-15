@@ -1,0 +1,9 @@
+{
+    "preferredEmailAddress":"testuser2@test.com",
+    "firstName":"John2",
+    "lastName":"Doe2",
+    "displayFullNameOnGithubProfile":true,
+    "displayPreferredEmailOnGithubProfile":false,
+    "isVmwareEmployee":false,
+    "vmwareEmailAddress":""
+   }"
