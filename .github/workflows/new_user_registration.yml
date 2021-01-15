@@ -36,7 +36,7 @@ jobs:
         if: env.dupmember == 'false'
         run: |
           cat /tmp/issuebody.txt 
-          cat /tmp/issuebody.txt | sed '0,/^########$/d' > /tmp/issuebody.json
+          sed '1,4d' /tmp/issuebody.txt > /tmp/issuebody.json
           cat /tmp/issuebody.json
       - name: check /tmp/issuebody.json
         if: env.dupmember == 'false'
