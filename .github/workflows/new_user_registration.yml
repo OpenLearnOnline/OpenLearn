@@ -48,7 +48,6 @@ jobs:
           sed 's/\\//g' /tmp/issuebody.json > /tmp/issuebody2.json
           cat /tmp/issuebody2.json
           sed 's/\"//g' /tmp/issuebody2.json > /tmp/issuebody3.json
-          echo } >> /tmp/issuebody3.json
           cat /tmp/issuebody3.json
           mv -f /tmp/issuebody3.json /tmp/issuebody.json
           cat /tmp/issuebody.json
