@@ -4,8 +4,8 @@ on:
     types: [opened]
 
 jobs:
-  job_add_registration_data_to_datafile:
-    name: add_registration_data_to_datafile
+  job_new_member_invitation:
+    name: new_member_invitation
     if: contains( toJson(github), 'newuserregistration' )
     runs-on: ubuntu-latest
     steps:
@@ -16,40 +16,41 @@ jobs:
       - name: curl member record file
         run: |
           curl -H "Authorization: token $GITHUB_OAUTH_TOKEN" \
-          "https://raw.githubusercontent.com/OpenLearnOnline/admin-private/main/registrations${{ github.event.issue.user.login }}_${{ github.event.issue.user.id }}.json" \
+          "https://raw.githubusercontent.com/OpenLearnOnline/admin-private/main/registrations/${{ github.event.issue.user.login }}_${{ github.event.issue.user.id }}.json" \
           -o /tmp/raw_member_record_curl.json
       - name: check if member record exists
         run: |
           cat /tmp/raw_member_record_curl.json
           if [ $(wc -l <"/tmp/raw_member_record_curl.json") -ge 2 ]
           then
-            echo dupmember=true >> $GITHUB_ENV
+            echo duplicate_request=true >> $GITHUB_ENV
           else
-            echo dupmember=false >> $GITHUB_ENV
+            echo duplicate_request=false >> $GITHUB_ENV
           fi
+          echo $duplicate_request
       - name: extract payload data from issue body
-        if: env.dupmember == 'false'
+        if: env.duplicate_request == 'false'
         run: |
           echo -e '${{ github.event.issue.body }}' > /tmp/issuebody.txt
           cat /tmp/issuebody.txt 
       - name: remove instruction lines from issuebody file
-        if: env.dupmember == 'false'
+        if: env.duplicate_request == 'false'
         run: |
           cat /tmp/issuebody.txt 
           sed '1,4d' /tmp/issuebody.txt > /tmp/issuebody.json
           cat /tmp/issuebody.json
       - name: check /tmp/issuebody.json
-        if: env.dupmember == 'false'
+        if: env.duplicate_request == 'false'
         run: |
           cat /tmp/issuebody.json
       - name: add metadata fields to user registration data
-        if: env.dupmember == 'false'
+        if: env.duplicate_request == 'false'
         run: |
           jq '. += {"memberGithubId":"${{ github.event.issue.user.id }}"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
       - name: add more metadata fields to user registration data
-        if: env.dupmember == 'false'
+        if: env.duplicate_request == 'false'
         run: |
           jq '. += {"memberGithubLogin":"${{ github.event.issue.user.login }}"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
@@ -61,25 +62,25 @@ jobs:
         run: |
           echo $(echo requesting_user_email=$(echo $(cat /tmp/issuebody.json | jq '.preferredEmailAddress' | sed 's/"//g' ))) >> $GITHUB_ENV
       - name: push new member record to admin-private/registrations
-        if: env.dupmember == 'false'
+        if: env.duplicate_request == 'false'
         run: |
           curl -X PUT \
           -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
           -H "Accept: application/vnd.github.v3+json" \
           -d '{"message": "Updating Member Record File For ${{ github.event.issue.user.login }}", "content": "'$(cat /tmp/issuebody.json | base64 -w 0 )'"}'                                                        \
-          "https://api.github.com/repos/openlearnonline/contents/admin-private/registrations/${{ github.event.issue.user.login }}_${{ github.event.issue.user.id }}.json"
+          "https://api.github.com/repos/openlearnonline/admin-private/contents/registrations/${{ github.event.issue.user.login }}_${{ github.event.issue.user.id }}.json"
       - name: clone openlearn repo
         run: |
           git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/openlearn.git
           cd openlearn
           pwd
       - name: curl orgteamregapicall.sh and make executable
-        if: env.dupmember == 'false'
+        if: env.duplicate_request == 'false'
         run: |
           curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
           sudo chmod +x /tmp/orgteamregapicall.sh
       - name: make org and team invite api call
-        if: env.dupmember == 'false'
+        if: env.duplicate_request == 'false'
         env:
           GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
         run: |
@@ -91,8 +92,8 @@ jobs:
           echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
           echo "  user: modernappsninjabot" >> ~/.config/hub
           cat ~/.config/hub
-      - name: if dupmember true, send email duplicate registration notice
-        if: env.dupmember == 'true'
+      - name: if duplicate_request true, send email duplicate registration notice
+        if: env.duplicate_request == 'true'
         uses: dawidd6/action-send-mail@v2
         continue-on-error: true
         with:
@@ -108,8 +109,8 @@ jobs:
             When you open a registration request, the github account you are logged in as at the time is used for the registration request.
             If you intended to request registration for a different account, please log in with the desired account first, and then open a new registration request ticket.
             If you believe this message to be in error, or are having issues with your account registration, please open a support request ticket at https://github.com/modernappsninja.modernappsninja.github.io
-      - name: if dupmember false, send email registration complete notice
-        if: env.dupmember == 'false'
+      - name: if duplicate_request false, send email registration complete notice
+        if: env.duplicate_request == 'false'
         uses: dawidd6/action-send-mail@v2
         continue-on-error: true
         with:
@@ -125,14 +126,14 @@ jobs:
             Before registration can be finalized for the requesting github account, you will need to view the invitation email sent by github to the email address associated with the ${{ env.requesting_user_login }} Github account.
             After you accept the invitation for the account to join the ModernApps Ninja Github account, a workflow will be triggered that will complete your user registration and setup your member profile page, and an email will be sent to this address when the process is complete. 
             Thank you for your participation and welcome to the ModernApps Ninja Community!
-      - name: if dupmember true, append message to issue ticket and close ticket
-        if: env.dupmember == 'true'
+      - name: if duplicate_request true, append message to issue ticket and close ticket
+        if: env.duplicate_request == 'true'
         run: |
           cd openlearn
           hub issue update $issue_number --message "registration request for user ${{ github.event.issue.user.login }} is dupicate, closing" --message "The github user ${{ env.requesting_user_login }} is already registered. This request has been marked as a dupicate request and will be closed."
           hub issue update $issue_number -s closed
-      - name: if dupmember false, append message to issue ticket and close ticket
-        if: env.dupmember == 'false'
+      - name: if duplicate_request false, append message to issue ticket and close ticket
+        if: env.duplicate_request == 'false'
         run: |
           cd openlearn
           hub issue update $issue_number --message "registration request for user $requesting_user_login has been processed" --message "The github user ${{ env.requesting_user_login }} has been sent an invite to join the modernapps ninja org, and this issue ticket will now be closed."
