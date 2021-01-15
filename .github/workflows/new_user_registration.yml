@@ -55,7 +55,7 @@ jobs:
       - name: add metadata fields to user registration data
         if: env.dupmember == 'false'
         run: |
-          jq '. += {"memberGithubId":'${{ github.event.issue.user.id }}'}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
+          jq '. += {"memberGithubId":${{ github.event.issue.user.id }}}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
           jq '. += {"memberGithubLogin":"'${{ github.event.issue.user.login }}'"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
