@@ -64,9 +64,9 @@ jobs:
         if: env.dupmember == 'false'
         run: |
           curl -X PUT \
-          -H "Authorization: token ${{ secrets.NINJABOTGURU }} \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
           -H "Accept: application/vnd.github.v3+json" \
-          -d '{"message": "Updating Member Record File For ${{ github.event.issue.user.login }}", }'                                                        \
+          -d '{"message": "Updating Member Record File For ${{ github.event.issue.user.login }}", "content": "'$(cat /tmp/issuebody.json | base64 -w 0 )'"}'                                                        \
           "https://api.github.com/repos/openlearnonline/contents/admin-private/registrations/${{ github.event.issue.user.login }}_${{ github.event.issue.user.id }}.json"
       - name: clone openlearn repo
         run: |
