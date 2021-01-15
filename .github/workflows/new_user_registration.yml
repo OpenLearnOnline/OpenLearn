@@ -45,16 +45,14 @@ jobs:
       - name: remove unnecessary slashes and trailing quote from issuebody file
         if: env.dupmember == 'false'
         run: |
-          sed 's/\\//g' /tmp/issuebody.json > /tmp/issuebody2.json
-          cat /tmp/issuebody2.json
-          sed 's/\"//g' /tmp/issuebody2.json > /tmp/issuebody3.json
+          sed 's/\"//g' /tmp/issuebody.json > /tmp/issuebody3.json
           cat /tmp/issuebody3.json
           mv -f /tmp/issuebody3.json /tmp/issuebody.json
           cat /tmp/issuebody.json
       - name: add metadata fields to user registration data
         if: env.dupmember == 'false'
         run: |
-          jq '. += {"memberGithubId":${{ github.event.issue.user.id }}}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
+          jq '. += {"memberGithubId":"${{ github.event.issue.user.id }}"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
           mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
           cat /tmp/issuebody.json
           jq '. += {"memberGithubLogin":"'${{ github.event.issue.user.login }}'"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
