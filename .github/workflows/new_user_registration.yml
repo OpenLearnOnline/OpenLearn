@@ -38,6 +38,10 @@ jobs:
           cat /tmp/issuebody.txt 
           cat /tmp/issuebody.txt | sed '0,/^########$/d' > /tmp/issuebody.json
           cat /tmp/issuebody.json
+      - name: check /tmp/issuebody.json
+        if: env.dupmember == 'false'
+        run: |
+          cat /tmp/issuebody.json
       - name: remove unnecessary slashes and trailing quote from issuebody file
         if: env.dupmember == 'false'
         run: |
