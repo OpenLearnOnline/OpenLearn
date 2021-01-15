@@ -94,6 +94,7 @@ jobs:
       - name: if dupmember true, send email duplicate registration notice
         if: env.dupmember == 'true'
         uses: dawidd6/action-send-mail@v2
+        continue-on-error: true
         with:
           server_address: smtp.gmail.com
           server_port: 465
@@ -110,6 +111,7 @@ jobs:
       - name: if dupmember false, send email registration complete notice
         if: env.dupmember == 'false'
         uses: dawidd6/action-send-mail@v2
+        continue-on-error: true
         with:
           server_address: smtp.gmail.com
           server_port: 465
