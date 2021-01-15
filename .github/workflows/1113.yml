@@ -19,6 +19,65 @@ jobs:
       - name: echo if removed
         if: github.event.client_payload.action == 'removed'
         run: echo "the webhook action was removed"
+      - name: echo client_payload.action variable
+        run: echo ${{ github.event.client_payload.action }}
+      - name: initialize git
+        run: |
+          git config --global user.name modernappsninjabot
+          git config --global user.email modernappsninjabot@gmail.com
+          git init
+      - name: clone admin-private repo
+        run: |
+          git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/admin-private.git
+      - name: clone member_repo_template
+        run: |
+          git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/modernappsninja/member_repo_template.git
+      - name: create hub config file
+        run: |
+          echo "---" > ~/.config/hub
+          echo "github.com: " >> ~/.config/hub
+          echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
+          echo "  user: modernappsninjabot" >> ~/.config/hub
+          cat ~/.config/hub
+      - name: extract user record from members.json file
+        run: |
+          cd /home/runner/work/OpenLearn/OpenLearn/admin-private
+          jq '.members.member[] | select(.memberGithubId=='${{ github.event.client_payload.member_github_id }}')' registrations/members.json > /tmp/member_record.json
+          cat /tmp/member_record.json
+      - name: extract firstName from member_record and set as first_name
+        run: |
+          echo $(echo first_name=$(echo $(cat /tmp/member_record.json | jq '.firstName' | sed 's/"//g' ))) >> $GITHUB_ENV
+          echo $first_name
+      - name: extract lastName from member_record and set as last_name
+        run: |
+          echo $(echo last_name=$(echo $(cat /tmp/member_record.json | jq '.lastName' | sed 's/"//g' ))) >> $GITHUB_ENV
+          echo $last_name
+      - name: extract twitterUsername from member_record and set as twitter_username
+        run: |
+          echo $(echo twitter_username=$(echo $(cat /tmp/member_record.json | jq '.twitterUsername' | sed 's/"//g' ))) >> $GITHUB_ENV
+          echo $twitter_username
+      - name: extract linkedinUsername from member_record and set as linkedin_username
+        run: |
+          echo $(echo linkedin_username=$(echo $(cat /tmp/member_record.json | jq '.linkedinUsername' | sed 's/"//g' ))) >> $GITHUB_ENV
+          echo $linkedin_username
+
+
+
+  "firstName":"",
+  "lastName":"",
+  "twitterUsername":"",
+  "linkedinUsername":"",
+
+
+
+
+      - name: Populate config.toml file with environmental variables
+        run: |
+          git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/modernappsninja/member_repo_template.git
+ 
+
+
+
   member_removed:
     name: member removed job
     runs-on: ubuntu-latest
