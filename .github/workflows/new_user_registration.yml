@@ -35,7 +35,8 @@ jobs:
       - name: remove instruction lines from issuebody file
         if: env.dupmember == 'false'
         run: |
-          sed '0,/^########$/d' /tmp/issuebody.txt > /tmp/issuebody.json
+          cat /tmp/issuebody.txt 
+          cat /tmp/issuebody.txt | sed '0,/^########$/d' > /tmp/issuebody.json
           cat /tmp/issuebody.json
       - name: remove unnecessary slashes and trailing quote from issuebody file
         if: env.dupmember == 'false'
