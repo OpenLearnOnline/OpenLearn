@@ -17,7 +17,7 @@ jobs:
         run: |
           curl -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
           "https://raw.githubusercontent.com/OpenLearnOnline/admin-private/main/registrations/${{ github.event.issue.user.login }}_${{ github.event.issue.user.id }}.json" \
-          -o /tmp/raw_member_record_curl.json"
+          -o /tmp/raw_member_record_curl.json
       - name: check if member record exists
         run: |
           cat /tmp/raw_member_record_curl.json
