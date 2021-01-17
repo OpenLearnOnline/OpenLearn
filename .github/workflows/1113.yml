@@ -26,9 +26,11 @@ jobs:
           git config --global user.name modernappsninjabot
           git config --global user.email modernappsninjabot@gmail.com
           git init
-      - name: clone admin-private repo
+      - name: curl member record file
         run: |
-          git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/admin-private.git
+          curl -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          "https://raw.githubusercontent.com/OpenLearnOnline/admin-private/main/registrations/${{ github.event.client_payload.member_login }}_${{ github.event.client_payload.member_github_id }}.json" \
+          -o /tmp/member_record.json
       - name: clone member_repo_template
         run: |
           git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/modernappsninja/member_repo_template.git
@@ -39,11 +41,6 @@ jobs:
           echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
           echo "  user: modernappsninjabot" >> ~/.config/hub
           cat ~/.config/hub
-      - name: extract user record from members.json file
-        run: |
-          cd /home/runner/work/OpenLearn/OpenLearn/admin-private
-          jq '.members.member[] | select(.memberGithubId=='${{ github.event.client_payload.member_github_id }}')' registrations/members.json > /tmp/member_record.json
-          cat /tmp/member_record.json
       - name: extract firstName from member_record and set as first_name
         run: |
           echo $(echo first_name=$(echo $(cat /tmp/member_record.json | jq '.firstName' | sed 's/"//g' ))) >> $GITHUB_ENV
@@ -60,36 +57,33 @@ jobs:
         run: |
           echo $(echo linkedin_username=$(echo $(cat /tmp/member_record.json | jq '.linkedinUsername' | sed 's/"//g' ))) >> $GITHUB_ENV
           echo $linkedin_username
-
-
-
-  "firstName":"",
-  "lastName":"",
-  "twitterUsername":"",
-  "linkedinUsername":"",
-
-
-
-
-      - name: Populate config.toml file with environmental variables
+      - name: envsubst config.toml file
+        env:
+          member_login: ${{ github.event.client_payload.member_login }}
         run: |
-          git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/modernappsninja/member_repo_template.git
- 
-
-
-
-  member_removed:
-    name: member removed job
-    runs-on: ubuntu-latest
-    if: github.event.client_payload.action == 'removed'
-    steps:
-      - name: cat payload file
-        run: cat /home/runner/work/_temp/_github_workflow/event.json
-      - name: echo client_payload.action variable
-        run: echo ${{ github.event.client_payload.action }}
-      - name: echo if added
-        if: github.event.client_payload.action == 'added'
-        run: echo "the webhook action was added"
-      - name: echo if removed
-        if: github.event.client_payload.action == 'removed'
-        run: echo "the webhook action was removed"
+          cd member_repo_template
+          envsubst <"config.toml" > config.toml.tmp
+          mv -f config.toml.tmp config.toml
+      - name: envsubst homepage.yml file
+        env:
+          member_login: ${{ github.event.client_payload.member_login }}
+        run: |
+          cd member_repo_template
+          envsubst <"data/en/homepage.yml" > /tmp/homepage.yml.tmp
+          mv -f /tmp/homepage.yml.tmp data/en/homepage.yml
+      - name: envsubst git config file
+        env:
+          repo_org_name: ${{ github.event.client_payload.org_name }}
+        run: |
+          cd member_repo_template
+          envsubst <"static/admin/git_config_template.txt" > /tmp/git_config
+          mv -f /tmp/git_config .git.config
+      - name: create new member repository
+        run: |
+          curl -X POST \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -d '{"name:"'$member_login'"}' \
+          "https://api.github.com/orgs/$repo_org_name/repos/ \
+          -o /tmp/member_repo_create_curl_response.json
+          cat /tmp/member_repo_create_curl_response.json
