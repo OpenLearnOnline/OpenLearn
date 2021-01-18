@@ -86,8 +86,7 @@ jobs:
         run: |
           curl -X POST \
           -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
-          -H "Accept: application/vnd.github.v3+json" \
           -d '{"name:"${{ github.event.client_payload.member_login }}"}' \
-          "https://api.github.com/orgs/modernappsninjas/repos/" \
+          "https://api.github.com/orgs/modernappsninjas/repos" \
           -o /tmp/member_repo_create_curl_response.json
           cat /tmp/member_repo_create_curl_response.json
