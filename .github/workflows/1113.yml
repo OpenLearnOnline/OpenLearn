@@ -57,25 +57,26 @@ jobs:
         run: |
           echo $(echo linkedin_username=$(echo $(cat /tmp/member_record.json | jq '.linkedinUsername' | sed 's/"//g' ))) >> $GITHUB_ENV
           echo $linkedin_username
+      - name: set member login as member_login
+        run: |
+          echo $(echo member_login="${{ github.event.client_payload.member_login }}") >> $GITHUB_ENV
+          echo $member_login
+      - name: set organization name for new repository creation as repo_org_name
+        run: |
+          echo repo_org_name="modernappsninjas" >> $GITHUB_ENV
       - name: envsubst config.toml file
-        env:
-          member_login: ${{ github.event.client_payload.member_login }}
         run: |
           cd member_repo_template
           envsubst <"config.toml" > config.toml.tmp
           mv -f config.toml.tmp config.toml
           cat config.toml
       - name: envsubst homepage.yml file
-        env:
-          member_login: ${{ github.event.client_payload.member_login }}
         run: |
           cd member_repo_template
           envsubst <"data/en/homepage.yml" > /tmp/homepage.yml.tmp
           mv -f /tmp/homepage.yml.tmp data/en/homepage.yml
           cat data/en/homepage.yml
       - name: envsubst git config file
-        env:
-          repo_org_name: "modernappsninjas"
         run: |
           cd member_repo_template
           envsubst <"static/admin/git_config_template.txt" > /tmp/git_config
@@ -87,6 +88,6 @@ jobs:
           -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
           -H "Accept: application/vnd.github.v3+json" \
           -d '{"name:"'$member_login'"}' \
-          "https://api.github.com/orgs/$repo_org_name/repos/ \
+          "https://api.github.com/orgs/$repo_org_name/repos/" \
           -o /tmp/member_repo_create_curl_response.json
           cat /tmp/member_repo_create_curl_response.json
