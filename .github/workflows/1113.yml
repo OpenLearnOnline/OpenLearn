@@ -73,7 +73,7 @@ jobs:
           mv -f /tmp/homepage.yml.tmp data/en/homepage.yml
       - name: envsubst git config file
         env:
-          repo_org_name: ${{ github.event.client_payload.org_name }}
+          repo_org_name: "modernappsninjas"
         run: |
           cd member_repo_template
           envsubst <"static/admin/git_config_template.txt" > /tmp/git_config

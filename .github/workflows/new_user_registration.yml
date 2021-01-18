@@ -77,13 +77,13 @@ jobs:
         if: env.duplicate_request == 'false'
         env:
           requesting_user_id: ${{ github.event.issue.user.id }}
+          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
+          org_login: ${{ github.event.organization.login }}
         run: |
           curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
           sudo chmod +x /tmp/orgteamregapicall.sh
       - name: make org and team invite api call
         if: env.duplicate_request == 'false'
-        env:
-          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
         run: |
           /tmp/orgteamregapicall.sh
       - name: create hub config file
@@ -123,8 +123,8 @@ jobs:
           from: modernappsninjabot@gmail.com
           subject: An invite has been sent to ${{ github.event.issue.user.login }} to join the ModernApps Ninja Github org.
           body: |
-            Your registration request with ModernApps Ninja for github user ${{ github.event.issue.user.login  }} was recieved and an invitation to join the org has been sent to the email associated with the ${{ env.requesting_user_login }} Github account.
-            Before registration can be finalized for the requesting github account, you will need to view the invitation email sent by github to the email address associated with the ${{ env.requesting_user_login }} Github account.
+            Your registration request with ModernApps Ninja for github user ${{ github.event.issue.user.login  }} was recieved and an invitation to join the org has been sent to the email associated with the ${{ github.event.issue.user.login }} is dupicate, closing" --message "The github user ${{ github.event.issue.user.login }} Github account.
+            Before registration can be finalized for the requesting github account, you will need to view the invitation email sent by github to the email address associated with the ${{ github.event.issue.user.login }} is dupicate, closing" --message "The github user ${{ github.event.issue.user.login }} Github account.
             After you accept the invitation for the account to join the ModernApps Ninja Github account, a workflow will be triggered that will complete your user registration and setup your member profile page, and an email will be sent to this address when the process is complete. 
             Thank you for your participation and welcome to the ModernApps Ninja Community!
       - name: if duplicate_request true, append message to issue ticket and close ticket
