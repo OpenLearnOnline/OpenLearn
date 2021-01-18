@@ -58,6 +58,17 @@ jobs:
       - name: extract user preferred email and set as requesting_user_email
         run: |
           echo $(echo requesting_user_email=$(echo $(cat /tmp/issuebody.json | jq '.preferredEmailAddress' | sed 's/"//g' ))) >> $GITHUB_ENV
+      - name: extract user id and set as requesting_user_id
+        run: |
+          echo $(echo requesting_user_id="${{ github.event.issue.user.id }}") >> $GITHUB_ENV
+          echo $requesting_user_id
+      - name: set token as GITHUB_OAUTH_TOKEN
+        run: |
+          echo $(echo GITHUB_OAUTH_TOKEN="${{ secrets.NINJABOTGURU }}") >> $GITHUB_ENV
+          echo $GITHUB_OAUTH_TOKEN
+      - name: set organization name as org_login
+        run: |
+          echo $(echo org_login="${{ github.event.organization.login }}") >> $GITHUB_ENV
       - name: push new member record to admin-private/registrations
         if: env.duplicate_request == 'false'
         run: |
@@ -80,10 +91,6 @@ jobs:
           sudo chmod +x /tmp/orgteamregapicall.sh
       - name: make org and team invite api call
         if: env.duplicate_request == 'false'
-        env:
-          requesting_user_id: ${{ github.event.issue.user.id }}
-          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
-          org_login: ${{ github.event.organization.login }}
         run: |
           /tmp/orgteamregapicall.sh
       - name: create hub config file

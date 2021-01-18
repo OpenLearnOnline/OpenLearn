@@ -64,6 +64,7 @@ jobs:
           cd member_repo_template
           envsubst <"config.toml" > config.toml.tmp
           mv -f config.toml.tmp config.toml
+          cat config.toml
       - name: envsubst homepage.yml file
         env:
           member_login: ${{ github.event.client_payload.member_login }}
@@ -71,13 +72,15 @@ jobs:
           cd member_repo_template
           envsubst <"data/en/homepage.yml" > /tmp/homepage.yml.tmp
           mv -f /tmp/homepage.yml.tmp data/en/homepage.yml
+          cat data/en/homepage.yml
       - name: envsubst git config file
         env:
           repo_org_name: "modernappsninjas"
         run: |
           cd member_repo_template
           envsubst <"static/admin/git_config_template.txt" > /tmp/git_config
-          mv -f /tmp/git_config .git.config
+          mv -f /tmp/git_config .git/config
+          cat .git/config
       - name: create new member repository
         run: |
           curl -X POST \
