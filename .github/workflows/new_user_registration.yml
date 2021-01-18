@@ -75,15 +75,15 @@ jobs:
           pwd
       - name: curl orgteamregapicall.sh and make executable
         if: env.duplicate_request == 'false'
-        env:
-          requesting_user_id: ${{ github.event.issue.user.id }}
-          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
-          org_login: ${{ github.event.organization.login }}
         run: |
           curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
           sudo chmod +x /tmp/orgteamregapicall.sh
       - name: make org and team invite api call
         if: env.duplicate_request == 'false'
+        env:
+          requesting_user_id: ${{ github.event.issue.user.id }}
+          GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
+          org_login: ${{ github.event.organization.login }}
         run: |
           /tmp/orgteamregapicall.sh
       - name: create hub config file
