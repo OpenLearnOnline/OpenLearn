@@ -73,17 +73,18 @@ jobs:
           git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/openlearn.git
           cd openlearn
           pwd
-      - name: curl orgteamregapicall.sh and make executable
+      - name: make orgteamregapicall.sh executable
         if: env.duplicate_request == 'false'
+        env:
+          member_id: ${{ github.event.issue.user.id }}
         run: |
-          curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
-          sudo chmod +x /tmp/orgteamregapicall.sh
+          sudo chmod +x member_repo_template/static/admin/orgteamregapicall.sh
       - name: make org and team invite api call
         if: env.duplicate_request == 'false'
         env:
           GITHUB_OAUTH_TOKEN: ${{ secrets.NINJABOTGURU }}
         run: |
-          /tmp/orgteamregapicall.sh
+          ./member_repo_template/static/admin/orgteamregapicall.sh
       - name: create hub config file
         run: |
           echo "---" > ~/.config/hub
