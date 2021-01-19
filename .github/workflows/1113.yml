@@ -101,3 +101,29 @@ jobs:
           git branch -M main
           git remote add origin https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/modernappsninjas/${{ github.event.client_payload.member_login }}.git
           git push -u origin main
+      - name: initial hugo build
+        run: |
+          cd ${{ github.event.client_payload.member_login }}
+          echo "public" >> .gitignore
+          git checkout --orphan gh-pages
+          git reset --hard
+          git commit --allow-empty -m "Initializing gh-pages branch"
+          git push origin gh-pages
+          git checkout main
+          sudo rm -rf public
+          git worktree add -B gh-pages public origin/gh-pages
+          hugo
+          cd public
+          git add --all
+          git commit -m "Publishing to gh-pages"
+          cd ..
+          git push origin gh-pages
+      - name: enable github pages for new member repo
+        run: |
+          curl -X POST \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          -H "Accept: application/vnd.github.switcheroo-preview+json" \
+          -d '{"source":{"branch":"gh-pages","path":"/"}}' \
+          "https://api.github.com/repos/modernappsninjas/${{ github.event.client_payload.member_login }}/pages" \
+          -o /tmp/member_repo_enable_pages_response.json
+          cat /tmp/member_repo_enable_pages_response.json
