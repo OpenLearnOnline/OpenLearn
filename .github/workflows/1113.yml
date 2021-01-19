@@ -90,3 +90,8 @@ jobs:
           "https://api.github.com/orgs/modernappsninjas/repos" \
           -o /tmp/member_repo_create_curl_response.json
           cat /tmp/member_repo_create_curl_response.json
+      - name: push content to new member repo
+        run: |
+          cd member_repo_template
+          git branch -M main
+          git push -u origin main
