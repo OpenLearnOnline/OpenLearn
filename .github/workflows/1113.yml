@@ -101,11 +101,12 @@ jobs:
           git branch -M main
           git remote add origin https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/modernappsninjas/${{ github.event.client_payload.member_login }}.git
           git push -u origin main
-      - name: initial hugo build
+      - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
           hugo-version: 'latest'
           extended: true
+      - name: initial hugo build
         run: |
           cd ${{ github.event.client_payload.member_login }}
           echo "public" >> .gitignore
