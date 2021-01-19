@@ -102,6 +102,10 @@ jobs:
           git remote add origin https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/modernappsninjas/${{ github.event.client_payload.member_login }}.git
           git push -u origin main
       - name: initial hugo build
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 'latest'
+          extended: true
         run: |
           cd ${{ github.event.client_payload.member_login }}
           echo "public" >> .gitignore
@@ -112,7 +116,7 @@ jobs:
           git checkout main
           sudo rm -rf public
           git worktree add -B gh-pages public origin/gh-pages
-          hugo
+          hugo --minify
           cd public
           git add --all
           git commit -m "Publishing to gh-pages"
