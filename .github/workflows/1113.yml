@@ -90,8 +90,14 @@ jobs:
           "https://api.github.com/orgs/modernappsninjas/repos" \
           -o /tmp/member_repo_create_curl_response.json
           cat /tmp/member_repo_create_curl_response.json
-      - name: push content to new member repo
+      - name: prep local directory for new member repo content
         run: |
-          cd member_repo_template
+          cp -R member_repo_template ${{ github.event.client_payload.member_login }}
+          cd ${{ github.event.client_payload.member_login }}
+          sudo rm -r .git/
+          git init
+          git add .
+          git commit -m "initial setup for ${{ github.event.client_payload.member_login }} member repo"
           git branch -M main
+          git remote add origin https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/modernappsninjas/${{ github.event.client_payload.member_login }}.git
           git push -u origin main
