@@ -6,9 +6,5 @@ jobs:
   say_hello:
     runs-on: ubuntu-latest
     steps:
-    - name: set var FOO
-      run: echo $(echo "FOO=$(echo "noodles")") >> $GITHUB_ENV
-    - name: verify var
-      run: echo $FOO >> /tmp/foofile.txt
-    - name: verify foofile
-      run: cat /tmp/foofile.txt
+      - name: cat payload file
+        run: cat /home/runner/work/_temp/_github_workflow/event.json
