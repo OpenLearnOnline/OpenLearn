@@ -7,4 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: cat payload file
-        run: for i in {1..5}; do echo num=$i; done
+        run: |
+          
+          while read i; do echo num=$i; done < $(echo willy)
