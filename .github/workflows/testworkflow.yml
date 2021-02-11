@@ -7,4 +7,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: cat payload file
-        run: cat /home/runner/work/_temp/_github_workflow/event.json
+        run: for i in {1..5}; do echo num=$i; done
