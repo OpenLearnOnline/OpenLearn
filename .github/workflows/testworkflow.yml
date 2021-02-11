@@ -6,6 +6,10 @@ jobs:
   say_hello:
     runs-on: ubuntu-latest
     steps:
+      - name: check local variable in step
+        run: |
+          export noodle=boby
+          echo $noodle
       - name: cat payload file
         run: |
           echo line1 > willy.abs
