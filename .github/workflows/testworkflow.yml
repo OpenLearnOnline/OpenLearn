@@ -8,5 +8,6 @@ jobs:
     steps:
       - name: cat payload file
         run: |
-          
-          while read i; do echo num=$i; done < $(echo willy)
+          echo line1 > willy.abs
+          echo line2 >> willy.abs
+          while read i; do echo num=$i; done < willy.abs
