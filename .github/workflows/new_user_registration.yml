@@ -1,154 +1,158 @@
-name: new_user_registration
+name: update_member_record
 on:
-  issues:
+  pull_request_target:
     types: [opened]
+    paths:
+    - 'static/userdata/member_record.yml'
 
 jobs:
-  job_new_member_invitation:
-    name: new_member_invitation
-    if: contains( toJson(github), 'newuserregistration' )
+  job_verify_identity:
+    name: verify_identity
     runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.idverified.outputs.idverified }}
     steps:
-      - name: set git configuration
+      - name: review event details
         run: |
-          git config --global user.name modernappsninjabot
-          git config --global user.email modernappsninjabot@gmail.com
+          env
+          cat /home/runner/work/_temp/_github_workflow/event.json
+      - name: install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.6.0/yq_linux_amd64 -O /usr/bin/yq &&\
+          sudo chmod +x /usr/bin/yq
       - name: curl member record file
         run: |
+          echo "github event repository name: ${{ github.event.repository.name }}"
           curl -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
-          "https://raw.githubusercontent.com/OpenLearnOnline/admin-private/main/registrations/${{ github.event.issue.user.login }}_${{ github.event.issue.user.id }}.json" \
-          -o /tmp/raw_member_record_curl.json
-      - name: check if member record exists
+          "https://raw.githubusercontent.com/modernappsninjas/${{ github.event.repository.name }}/main/static/userdata/member_record.yml" \
+          -o /tmp/member_record.yml
+          cat /tmp/member_record.yml
+      - name: exract member login from existing member record
         run: |
-          cat /tmp/raw_member_record_curl.json
-          if [ $(wc -l <"/tmp/raw_member_record_curl.json") -ge 2 ]
+          yq e '.memberGithubLogin' /tmp/member_record.yml > /tmp/member_record_login
+          echo member_record_login=$(cat /tmp/member_record_login) >> $GITHUB_ENV
+      - name: verify that github account that opened pull request is the same as member record file being updated
+        run: |
+          echo ${{ env.member_record_login }}
+          if [ "${{ env.member_record_login }}" = "${{ github.event.sender.login }}" ]
           then
-            echo duplicate_request=true >> $GITHUB_ENV
+            echo idverified=true >> $GITHUB_ENV
+            echo "the requesting member is correctly updating their own record"
           else
-            echo duplicate_request=false >> $GITHUB_ENV
+            echo idverified=false >> $GITHUB_ENV
+            echo "the requesting user account is not the owner of this record"
           fi
-          echo $duplicate_request
-      - name: extract payload data from issue body
+      - id: idverified
+        if: env.idverified == 'true'
+        run: echo "::set-output name=idverified::true"
+      - name: if not verified, post message to pr
+        if: env.idverified == 'false'
         run: |
-          echo -e '${{ github.event.issue.body }}' > /tmp/issuebody.txt
-          cat /tmp/issuebody.txt 
-      - name: remove instruction lines from issuebody file
+          curl -X POST \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -d '{"event": "COMMENT", "body": "@'${{ github.event.sender.login }}' You must be logged in to Github with the same username as the memberGithubLogin as the member record file you are attempting to update. Please login as the member if you would like to update the member record. This PR will now be closed."}' \
+          "https://api.github.com/repos/${{ env.org_repo }}/pulls/${{ github.event.number }}/reviews" \
+          -o /tmp/pr_comment_post_response.json
+          cat /tmp/pr_comment_post_response.json
+      - name: if not verified, close pr
+        if: env.ismember == 'false'
         run: |
-          cat /tmp/issuebody.txt 
-          sed '1,4d' /tmp/issuebody.txt > /tmp/issuebody.json
-          cat /tmp/issuebody.json
-      - name: check /tmp/issuebody.json
+          curl -X PATCH \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -d '{"state": "closed"}' \
+          "https://api.github.com/repos/${{ env.org_repo }}/pulls/${{ github.event.number }}" \
+          -o /tmp/close_pr_response.json
+          cat /tmp/close_pr_response.json
+  job_update_member_record:
+    name: update_member_record_job
+    needs: job_verify_identity
+    runs-on: ubuntu-latest
+    if: needs.job_verify_identity.outputs.output1 == 'true'
+    steps:
+      - name: review event details
         run: |
-          cat /tmp/issuebody.json
-      - name: add metadata fields to user registration data
-        if: env.duplicate_request == 'false'
+          env
+          cat /home/runner/work/_temp/_github_workflow/event.json
+      - name: install yq
         run: |
-          jq '. += {"memberGithubId":"${{ github.event.issue.user.id }}"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
-          mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
-          cat /tmp/issuebody.json
-      - name: add more metadata fields to user registration data
-        if: env.duplicate_request == 'false'
+          sudo wget https://github.com/mikefarah/yq/releases/download/v4.6.0/yq_linux_amd64 -O /usr/bin/yq &&\
+          sudo chmod +x /usr/bin/yq
+      - name: set org/repo as org_repo
         run: |
-          jq '. += {"memberGithubLogin":"${{ github.event.issue.user.login }}"}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
-          mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
-          cat /tmp/issuebody.json
-          jq '. += {"memberOfTeams":["Members"]}' /tmp/issuebody.json > /tmp/issuebody.json.tmp
-          mv -f /tmp/issuebody.json.tmp /tmp/issuebody.json
-          cat /tmp/issuebody.json
-      - name: extract user preferred email and set as requesting_user_email
+          echo $(echo org_repo="$GITHUB_REPOSITORY") >> $GITHUB_ENV
+          org_repo="$GITHUB_REPOSITORY"
+          echo $org_repo
+      - name: post message to pr
         run: |
-          echo $(echo requesting_user_email=$(echo $(cat /tmp/issuebody.json | jq '.preferredEmailAddress' | sed 's/"//g' ))) >> $GITHUB_ENV
-      - name: extract user id and set as requesting_user_id
-        run: |
-          echo $(echo requesting_user_id="${{ github.event.issue.user.id }}") >> $GITHUB_ENV
-          echo $requesting_user_id
-      - name: set token as GITHUB_OAUTH_TOKEN
-        run: |
-          echo $(echo GITHUB_OAUTH_TOKEN="${{ secrets.NINJABOTGURU }}") >> $GITHUB_ENV
-          echo $GITHUB_OAUTH_TOKEN
-      - name: set organization name as org_login
-        run: |
-          echo $(echo org_login="${{ github.event.organization.login }}") >> $GITHUB_ENV
-      - name: push new member record to admin-private/registrations
-        if: env.duplicate_request == 'false'
+          curl -X POST \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -d '{"event": "COMMENT", "body": "@'${{ github.event.sender.login }}' your member record file has been updated. You can see the updated file at [https://modernappsninjas.github.io/'${{ github.event.sender.login }}'/userdata/member_record.yml](https://modernappsninjas/'${{ github.event.sender.login }}'/userdata/member_record.yml). This PR will now be closed."}' \
+          "https://api.github.com/repos/${{ env.org_repo }}/pulls/${{ github.event.number }}/reviews" \
+          -o /tmp/pr_comment_post_response.json
+          cat /tmp/pr_comment_post_response.json
+      - name: merge pull request
         run: |
           curl -X PUT \
           -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
           -H "Accept: application/vnd.github.v3+json" \
-          -d '{"message": "Updating Member Record File For ${{ github.event.issue.user.login }}", "content": "'$(cat /tmp/issuebody.json | base64 -w 0 )'"}'                                                        \
-          "https://api.github.com/repos/openlearnonline/admin-private/contents/registrations/${{ github.event.issue.user.login }}_${{ github.event.issue.user.id }}.json" \
-          -o /tmp/member_record_post_response.json
-          cat /tmp/member_record_post_response.json
-      - name: clone openlearn repo
+          -d '{"commit_title": "Course Registration for ${{ github.event.sender.login }}"}'                                                        \
+          "https://api.github.com/repos/${{ env.org_repo }}/pulls/${{ github.event.number }}/merge" \
+          -o /tmp/merge_pr_response.json
+          cat /tmp/merge_pr_response.json
+          cat /tmp/merge_pr_response.json | jq -r '.sha'
+          merge_sha=$(cat /tmp/merge_pr_response.json | jq -r '.sha')
+          echo merge_sha=$(cat /tmp/merge_pr_response.json | jq -r '.sha') >> GITHUB_ENV
+      - name: close pr
         run: |
-          git clone https://${{ secrets.NINJABOTGURU }}:x-oauth-basic@github.com/openlearnonline/openlearn.git
-          cd openlearn
-          pwd
-      - name: curl orgteamregapicall.sh and make executable
-        if: env.duplicate_request == 'false'
+          curl -X PATCH \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -d '{"state": "closed"}' \
+          "https://api.github.com/repos/${{ env.org_repo }}/pulls/${{ github.event.number }}" \
+          -o /tmp/close_pr_response.json
+          cat /tmp/close_pr_response.json
+      - name: curl the member record file
         run: |
-          curl https://modernapps.ninja/admin/orgteamregapicall.sh -o /tmp/orgteamregapicall.sh
-          sudo chmod +x /tmp/orgteamregapicall.sh
-      - name: make org and team invite api call
-        if: env.duplicate_request == 'false'
+          curl -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          "https://raw.githubusercontent.com/modernappsninjas/${{ github.event.sender.login }}/main/static/userdata/member_record.yml" \
+          -o /tmp/merged_member_record.yml
+      - name: update member record metafields to ensure these fields are valided by github login and not modified by member
         run: |
-          /tmp/orgteamregapicall.sh
-      - name: create hub config file
+          sed -i '/^memberGithubId/c\memberGithubId: "'${{ github.event.sender.id }}'"' /tmp/merged_member_record.yml
+          sed -i '/^memberGithubLogin/c\memberGithubLogin: "'${{ github.event.sender.login }}'"' /tmp/merged_member_record.yml
+      - name: push updated member record to member repository
         run: |
-          echo "---" > ~/.config/hub
-          echo "github.com: " >> ~/.config/hub
-          echo "- oauth_token: ${{ secrets.NINJABOTGURU }}" >> ~/.config/hub
-          echo "  user: modernappsninjabot" >> ~/.config/hub
-          cat ~/.config/hub
-      - name: if duplicate_request true, send email duplicate registration notice
-        if: env.duplicate_request == 'true'
-        uses: dawidd6/action-send-mail@v2
-        continue-on-error: true
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: modernappsninjabot@gmail.com
-          password: ${{secrets.NINJABOT_MAIL_PASSWORD}}
-          to: ${{ env.requesting_user_email }}
-          from: modernappsninjabot@gmail.com
-          subject: Your ModernApps Ninja User Registration is a Duplicate
-          body: |
-            Your registration request with ModernApps Ninja for github user ${{ github.event.issue.user.login }} was recieved, but was found to be a duplicate request.
-            When you open a registration request, the github account you are logged in as at the time is used for the registration request.
-            If you intended to request registration for a different account, please log in with the desired account first, and then open a new registration request ticket.
-            If you believe this message to be in error, or are having issues with your account registration, please open a support request ticket at https://github.com/modernappsninja.modernappsninja.github.io
-      - name: if duplicate_request false, send email registration complete notice
-        if: env.duplicate_request == 'false'
-        uses: dawidd6/action-send-mail@v2
-        continue-on-error: true
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: modernappsninjabot@gmail.com
-          password: ${{secrets.NINJABOT_MAIL_PASSWORD}}
-          to: ${{ env.requesting_user_email }}
-          from: modernappsninjabot@gmail.com
-          subject: An invite has been sent to ${{ github.event.issue.user.login }} to join the ModernApps Ninja Github org.
-          body: |
-            Your registration request with ModernApps Ninja for github user ${{ github.event.issue.user.login  }} was recieved and an invitation to join the org has been sent to the email associated with the ${{ github.event.issue.user.login }} is dupicate, closing" --message "The github user ${{ github.event.issue.user.login }} Github account.
-            Before registration can be finalized for the requesting github account, you will need to view the invitation email sent by github to the email address associated with the ${{ github.event.issue.user.login }} is dupicate, closing" --message "The github user ${{ github.event.issue.user.login }} Github account.
-            After you accept the invitation for the account to join the ModernApps Ninja Github account, a workflow will be triggered that will complete your user registration and setup your member profile page, and an email will be sent to this address when the process is complete. 
-            Thank you for your participation and welcome to the ModernApps Ninja Community!
-      - name: if duplicate_request true, append message to issue ticket and close ticket
-        if: env.duplicate_request == 'true'
+          curl -X PUT \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -d '{"message": "Updating Member Record File For ${{ github.event.sender.login }}", "content": "$(cat /tmp/merged_member_record.yml | base64 -w 0)","sha":"${{ env.merge_sha }}"}' \
+          "https://api.github.com/repos/modernappsninjas/${{ github.event.sender.login }}/contents/userdata/member_record.yml" \
+          -o /tmp/member_repo_post_response.json
+          cat /tmp/member_repo_post_response.json
+      - name: gather member record file sha
         run: |
-          cd openlearn
-          hub issue update ${{ github.event.issue.number }} --message "registration request for user ${{ github.event.issue.user.login }} is dupicate, closing" --message "The github user ${{ github.event.issue.user.login }} is already registered. This request has been marked as a dupicate request and will be closed."
-          hub issue update ${{ github.event.issue.number }} -s closed
-      - name: if duplicate_request false, append message to issue ticket and close ticket
-        if: env.duplicate_request == 'false'
+          curl \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/repos/modernappsninja/admin-private/contents/userdata/members/${{ github.event.sender.login }}_${{ github.event.sender.id }}.yml" \
+          -o /tmp/member_record_sha.json
+          cat /tmp/member_record_sha.json
+          member_record_sha=$(cat /tmp/member_record_sha.json | jq -r '.sha')
+          echo "member record sha is: $member_record_sha"
+          echo member_record_sha=$(echo $member_record_sha) >> GITHUB_ENV
+      - name: check variables
         run: |
-          cd openlearn
-          hub issue update ${{ github.event.issue.number }} --message "registration request for user ${{ github.event.issue.user.login }} has been processed" --message "The github user ${{ github.event.issue.user.login }} has been sent an invite to join the modernapps ninja org, and this issue ticket will now be closed."
-          hub issue update ${{ github.event.issue.number }} -s closed
-      - name: transfer issue ticket to admin-private
+          echo "member record sha is: ${{ env.member_record_sha }}""
+          echo "merge sha is: ${{ env.merge_sha }}"
+      - name: push updated member record to admin-private/registrations
         run: |
-          cd openlearn
-          hub issue transfer ${{ github.event.issue.number }} ${{ github.event.organization.login }}/admin-private
-#      - name: Print event content
-#        run: cat /home/runner/work/_temp/_github_workflow/event.json
+          curl -X PUT \
+          -H "Authorization: token ${{ secrets.NINJABOTGURU }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -d '{"message": "Updating Member Record File For '${{ github.event.sender.login }}'", "content": "'$(cat /tmp/merged_member_record.yml | base64 -w 0)'", "sha":"'${{ env.member_record_sha }}'"}' \
+          "https://api.github.com/repos/modernappsninja/admin-private/contents/userdata/members/${{ github.event.sender.login }}_${{ github.event.sender.id }}.yml" \
+          -o /tmp/admin-private_member_record_post_response.json
+          cat /tmp/admin-private_member_record_post_response.json
